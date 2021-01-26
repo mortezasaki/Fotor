@@ -21,7 +21,7 @@ async def test():
         channel = await client.get_entity(search)
         print("channel")
         print(channel)
-        messages = await client.get_messages(channel, limit= 1) 
+        await client.get_messages(channel, limit= 1) 
         print("messages")
 
         await client(JoinChannelRequest(search))
