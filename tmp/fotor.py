@@ -27,17 +27,23 @@ async def test():
     
     # send Request for Get phonenumber 
 
-    url_get_phonenumber = "https://sms-activate.ru/stubs/handler_api.php?api_key="+API_Key+"&action=getNumber&service=tg&country="+str(country)
-    response_get_phonenumber = requests.post(url_get_phonenumber)
-    response_get_phonenumber = response_get_phonenumber.text.split(":")
-    if len(response_get_phonenumber) < 1 :
-        print("cant get phonenumber")
-        exit(0)
+    while True : 
 
-    print("response_get_phonenumber")
-    print(response_get_phonenumber)
-    phonenumber = response_get_phonenumber[2]
-    phonenumber_id = response_get_phonenumber[1]
+        url_get_phonenumber = "https://sms-activate.ru/stubs/handler_api.php?api_key="+API_Key+"&action=getNumber&service=tg&country="+str(country)
+        response_get_phonenumber = requests.post(url_get_phonenumber)
+        response_get_phonenumber = response_get_phonenumber.text.split(":")
+        if len(response_get_phonenumber) < 1 :
+            print("cant get phonenumber")
+            exit(0)
+
+        print("response_get_phonenumber")
+        print(response_get_phonenumber)
+        if response_get_phonenumber[0] == "NO_NUMBERS":
+            print("cant get phonenumber")
+        else :
+            phonenumber = response_get_phonenumber[2]
+            phonenumber_id = response_get_phonenumber[1]
+            break
 
     # end code for get phonenumber
 
