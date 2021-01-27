@@ -18,6 +18,11 @@ class TestJoin(unittest.TestCase):
     async def test_login(self):
         self.assertTrue(await self.join.Login())
 
+    async def test_search(self):
+        self.assertIsNotNone(await self.join.Search('membersgram_app'))
+        self.assertIsNone(await self.join.Search('12As'))
+        self.assertIsNone(await self.join.Search('fdsfdfdsfdsfdshgdfwewsdf'))
+
     def test_valid_username(self):
         self.assertTrue(self.join.ValidUsername('Morteza'))
         self.assertTrue(self.join.ValidUsername('Mor43443'))
