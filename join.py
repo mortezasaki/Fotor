@@ -14,12 +14,19 @@ from config import Config
 from telethon import TelegramClient
 import os
 import asyncio
+import re
 
 class Join:
     def __init__(self, phone_number : str):
         self.loop = asyncio.get_event_loop()
         self.phone_number = phone_number
         self.client = ''
+
+    def ValidUsername(self, username : str):
+        pattern = r'^[a-zA-Z]\w{5,}$'
+        if re.match(pattern, username):
+            return True
+        return False
 
     async def Login(self):
         tg_session_location = '{0}{1}.session'.format(Config['account_path'],phone_number)
@@ -28,3 +35,4 @@ class Join:
             if self.client.is_connected():
                 return True
             return False
+
