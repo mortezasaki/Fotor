@@ -40,7 +40,7 @@ class Join:
     async def Search(self, username : str):
         if self.ValidUsername(username):
             try :
-                return self.client.get_entity(username)
+                return await self.client.get_entity(username)
             except ValueError:
                 return None
         return None
@@ -52,4 +52,13 @@ class Join:
             except ValueError:
                 return None
         return None
+
+    async def GetChannels(self, username : str):
+        channels=[]
+        for dialog in self.client.iter_dialogs():
+            if not dialog.is_group and dialog.is_channel:
+                channels.append(dialog)
+        print(channels)
+        return channels
+
 
