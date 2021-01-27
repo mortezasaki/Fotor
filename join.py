@@ -12,6 +12,7 @@ import sys
 import utility 
 from config import Config
 from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 import os
 import asyncio
 import re
@@ -40,6 +41,14 @@ class Join:
         if self.ValidUsername(username):
             try :
                 return self.client.get_entity(username)
+            except ValueError:
+                return None
+        return None
+
+    async def JoinChannel(self, username : str):
+        if self.Search(username):
+            try :
+                return await self.client(JoinChannelRequest(username))
             except ValueError:
                 return None
         return None
