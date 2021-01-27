@@ -36,3 +36,11 @@ class Join:
                 return True
             return False
 
+    async def Search(self, username : str):
+        if self.ValidUsername(username):
+            try :
+                return self.client.get_entity(username)
+            except ValueError:
+                return None
+        return None
+
