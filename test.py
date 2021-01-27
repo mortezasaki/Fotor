@@ -2,7 +2,6 @@ import unittest
 import utility
 from join import Join
 import asyncio
-
 class TestUtility(unittest.TestCase):
     def test_ValidatePhone(self):
         self.assertTrue(utility.ValidatePhone('989161234578'))
