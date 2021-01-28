@@ -9,7 +9,7 @@ class Gender(enum.Enum):
     Woman = 1
 
 class TelegramRegisterStats(enum.Enum):
-    Succesfull = 1
+    Succesfull = 1 
     Ban = 2
     Flood = 3
     HasPassword = 4
