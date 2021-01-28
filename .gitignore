@@ -18,11 +18,13 @@ lib64/
 share/
 downloads/
 eggs/
+tmp/
 .eggs/
 lib/
 lib64/
 parts/
 sdist/
+Accounts
 var/
 wheels/
 pip-wheel-metadata/
