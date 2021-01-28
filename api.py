@@ -17,10 +17,31 @@ class API:
         if req.status_code == 200:
             res_status = req.json()['code']
             if res_status == RegisterAPIStatus.Succesfull.value:
-                self.SaveAccountInfo(self.phone_number, name, family, gender, country, str(status), str(res_status))
+                # self.SaveAccountInfo(self.phone_number, name, family, gender, country, str(status), str(res_status))
                 return True
             return False
         raise FaildAPIConnection() # Error when can't connect to Membersgram api
+
+    def CallGetChannel(self):
+        url = 'https://api.membersgram.com/api/v2/fotor/getChannel/%s' % self.phone_number
+        data = {'apiKey' : self.api_key }
+        req = requests.post(url, data=data)
+
+        if req.status_code == 200:
+            return req.json()['data']
+        return None
+
+    def CallJoin(self, _id : str):
+        url = 'https://api.membersgram.com/api/v2/fotor/joinChannel/{0}/{1}'.format(_id, self.phone_number)
+        data = {'apiKey' : self.api_key }
+        req = requests.post(url, data=data)
+
+        if req.status_code == 200:
+            res = req.json()['code']
+            if res == 200:
+                return True
+        return False
+
 
     def SaveAccountInfo(self, *argv):
         with open('Accounts/%s/info.txt' %(self.phone_number),'w') as f:
