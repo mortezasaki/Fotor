@@ -13,13 +13,19 @@ import utility
 from config import Config
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
+from telethon import errors
 import os
 import asyncio
 import re
+import logging
+from time import sleep
+from api import API
+from enums import *
+
+logging.getLogger().setLevel(logging.INFO)
 
 class Join:
     def __init__(self, phone_number : str):
-        self.loop = asyncio.get_event_loop()
         self.phone_number = phone_number
         self.client = ''
 
@@ -30,12 +36,17 @@ class Join:
         return False
 
     async def Login(self):
-        tg_session_location = '{0}{1}.session'.format(Config['account_path'],phone_number)
+        tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
         if os.path.exists(tg_session_location):
-            self.client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'])
+            self.client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                device_model = Config['device_model'], system_version = Config['system_version'], app_version = Config['app_version'],
+                flood_sleep_threshold = Config['flood_sleep_threshold'])
+            await self.client.connect()
             if self.client.is_connected():
                 return True
             return False
+        else:
+            raise False
 
     async def Search(self, username : str):
         if self.ValidUsername(username):
@@ -43,22 +54,58 @@ class Join:
                 return await self.client.get_entity(username)
             except ValueError:
                 return None
+            except errors.FloodWaitError as e:
+                logging.info('Flood wait for %s' % e.seconds)
+                sleep(e.seconds)
         return None
 
     async def JoinChannel(self, username : str):
         if self.Search(username):
             try :
                 return await self.client(JoinChannelRequest(username))
-            except ValueError:
+            except ValueError:  
                 return None
+            except errors.FloodWaitError as e:
+                logging.info('Flood wait for %s' % e.seconds)
+                sleep(e.seconds)
         return None
 
-    async def GetChannels(self, username : str):
+    async def GetChannels(self):
         channels=[]
-        for dialog in self.client.iter_dialogs():
+        async for dialog in self.client.iter_dialogs():
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
         print(channels)
         return channels
+    
+
+
+
+if __name__ == "__main__":
+    phone = sys.argv[1]
+    logging.info("Your phone is %s" % phone)
+    _join = Join(phone)
+    logging.info('Join')
+    loop = asyncio.get_event_loop()
+    is_login = loop.run_until_complete(_join.Login())
+
+    if is_login:
+        logging.info('Login..')
+        _api = API(phone)
+        _api.CallRegisterAPI("Morrr","Saki",Gender.Man.value,'Iran',status =TelegramRegisterStats.Succesfull.value)
+        while True:
+            channel = _api.CallGetChannel()
+            if channel is not None:
+                channel_username = channel['username']
+                logging.info('Join to %s' % channel_username)
+                channel_id = channel['_id']
+                try:
+                    loop.run_until_complete(_join.Search(channel_username))
+                    loop.run_until_complete(_join.JoinChannel(channel_username))
+                    if _api.CallJoin(channel_id):
+                        logging.info('Join was doned')
+                    sleep(1)
+                except errors.UserDeactivatedBanError:
+                    logging.info('The user has been banned')
 
 
