@@ -15,6 +15,9 @@ class TestUtility(unittest.TestCase):
         x = {1: 2, 3: 4, 4: 3, 2: 1, 0: 0}
         self.assertEqual(utility.SortDic(x), {0: 0, 2: 1, 1: 2, 4: 3, 3: 4})
 
+    def test_FakeNameGenerator(self):
+        self.assertIsNotNone(utility.FakeNameGenerator())
+
 class TestJoin(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestJoin, self).__init__(*args, **kwargs)
