@@ -15,8 +15,18 @@ class TestUtility(unittest.TestCase):
         x = {1: 2, 3: 4, 4: 3, 2: 1, 0: 0}
         self.assertEqual(utility.SortDic(x), {0: 0, 2: 1, 1: 2, 4: 3, 3: 4})
 
+    @unittest.skip('Take a long time')
     def test_FakeNameGenerator(self):
         self.assertIsNotNone(utility.FakeNameGenerator())
+
+    @unittest.skip('Take a long time')
+    def test_AndroidDeviceGenerator(self):
+        self.assertIsNotNone(utility.AndroidDeviceGenerator())
+    
+    def test_RandomCharacters(self):
+        random_char = utility.RandomCharacters()
+        print (random_char)
+        self.assertIsNotNone(random_char)
 
 class TestJoin(unittest.TestCase):
     def __init__(self, *args, **kwargs):
