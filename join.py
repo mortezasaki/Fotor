@@ -88,6 +88,22 @@ class SMSActivate:
             return sorted_costs
         return None
 
+    def GetNumber(self, country_code, service= 'tg'):
+        url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getNumber&service={1}&country={2}'.format(self.api_key, service, country_code)
+        req = requests.get(url)        
+
+        if req.status_code == 200:
+            try:
+                response = req.text
+                pattern = r'^(ACCESS_NUMBER:)\d{8,}(:)\d{8,}$'
+                if re.match(pattern, response):
+                    status_code = response.split(':')[1]
+                    phone_number = response.split(':')[2]
+                    return {'Status' : status_code, 'Phone' : phone_number}
+            except:
+                return None
+        return None
+
 # class SignUp:
 
 
