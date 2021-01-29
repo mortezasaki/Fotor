@@ -8,4 +8,5 @@ Config = {
     "system_version" : "SM-G570F",
     "app_version" : "1.0.0",
     "flood_sleep_threshold" : 60 * 60 * 12,
+    "SMS_Activate_API" : '376c29Ace3AA9A9f252d2c76c632f0bd',
 }
