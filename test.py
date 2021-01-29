@@ -28,6 +28,9 @@ class TestSMSActivate(unittest.TestCase):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertEqual(sms.Balance(), 389.98)
 
+    def test_GetCountry(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertIsNotNone(sms.GetCountry())
 
 
 if __name__ == '__main__':

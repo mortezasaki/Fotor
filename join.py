@@ -46,6 +46,18 @@ class SMSActivate:
         
         return False
 
+    def GetCountry(self):
+        url = 'https://sms-activate.ru/stubs/handler_api.php?api_key=%s&action=getCountries' % self.api_key
+        req = requests.get(url)
+
+        if req.status_code == 200: 
+            res = req.json()
+            countries = {}
+            for _id,names in res.items():
+                countries[_id] =  names['eng']
+            return countries
+        else:
+            return None
 
                 
 
