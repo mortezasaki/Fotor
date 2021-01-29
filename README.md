@@ -24,3 +24,5 @@ https://sms-activate.ru/en/api2//
 * [x] Fake Name Generator
 * [x] Fake Device Generator
 * [x] Generate Random Version
+* [x] Sign up in Telegram
+* [x] Join to channels
