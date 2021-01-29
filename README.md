@@ -20,3 +20,4 @@ https://sms-activate.ru/en/api2//
 * [x] Change Number Status
   * [x] Confirm Number
   * [x] Cancel Number
+* [x] Get Activation Code
