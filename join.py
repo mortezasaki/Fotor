@@ -104,6 +104,26 @@ class SMSActivate:
                 return None
         return None
 
+    def ChangeNumberStatus(self,id, status):
+        url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=setStatus&status={1}&id={2}'.format(self.api_key, status, id)
+        req = requests.get(url)        
+
+        if req.status_code == 200:
+            return req.text
+        return None
+
+    def ConfirmCode(self, id):
+        result = self.ChangeNumberStatus(id, SMSActivateSMSStatus.Complate.value)
+        if result is not None and result == 'ACCESS_ACTIVATION':
+            return True
+        return False
+    
+    def CancelCode(self, id):
+        result = self.ChangeNumberStatus(id, SMSActivateSMSStatus.Cancel.value)
+        if result is not None and result == 'ACCESS_CANCEL':
+            return True
+        return False        
+
 # class SignUp:
 
 

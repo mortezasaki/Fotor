@@ -13,3 +13,9 @@ class TelegramRegisterStats(enum.Enum):
     Ban = 2
     Flood = 3
     HasPassword = 4
+
+class SMSActivateSMSStatus(enum.Enum):
+    Report = 1
+    AnotherCode = 3
+    Complate = 6
+    Cancel = 8

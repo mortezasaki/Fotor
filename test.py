@@ -50,6 +50,15 @@ class TestSMSActivate(unittest.TestCase):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertIsNotNone(sms.GetNumber(2))
 
+    @unittest.skip('Take money')
+    def test_CancelCode(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertIsTrue(sms.ConfirmCode('384608665'))
+
+    def test_CancelCode(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertTrue(sms.CancelCode('384609854'))
+
 
 if __name__ == '__main__':
     with warnings.catch_warnings():
