@@ -14,3 +14,5 @@ https://sms-activate.ru/en/api2//
 ## Tasks
 * [x] Check Balance
 * [x] Get All Available Countries
+* [x] Get Price by country
+* [x] Sort country by cost
