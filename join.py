@@ -21,8 +21,38 @@ import logging
 from time import sleep
 from api import API
 from enums import *
+import requests
 
 logging.getLogger().setLevel(logging.INFO)
+
+
+class SMSActivate:
+    def __init__(self, api_key : str):
+        self.api_key = api_key
+        
+    def Balance(self):
+        url = 'https://sms-activate.ru/stubs/handler_api.php?api_key=%s&action=getBalance' % self.api_key
+        req = requests.get(url)
+
+        if req.status_code == 200: 
+            res = req.text
+            pattern = r'^(ACCESS_BALANCE:)\d+(\.\d+)?$'
+            if re.match(pattern, res): # Example ACCESS_BALANCE:389.98%
+                try:
+                    balance = float(res.split(':')[1])
+                    return balance
+                except:
+                    logging.info("Can't extract balance")
+        
+        return False
+
+
+                
+
+
+# class SignUp:
+
+
 
 class Join:
     def __init__(self, phone_number : str):

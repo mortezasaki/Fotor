@@ -1,6 +1,6 @@
 import unittest
 import utility
-from join import Join
+from join import Join, SMSActivate
 import asyncio
 import warnings
 class TestUtility(unittest.TestCase):
@@ -23,21 +23,10 @@ class TestJoin(unittest.TestCase):
         self.assertFalse(self.join.ValidUsername('dsfd'))
         self.assertFalse(self.join.ValidUsername('12As'))
 
-    def test_login(self):
-        self.assertTrue(self.join.Login())
-
-    def test_search(self):
-        self.assertIsNotNone(self.join.Search('membersgram_app'))
-        self.assertIsNone(self.join.Search('12As'))
-        self.assertIsNone(self.join.Search('fdsfdfdsfdsfdshgdfwewsdf'))
-    
-    async def test_Login(self):
-        await self.assertIsNotNone(await self.join.Search('membersgram_app'))
-        await self.assertIsNone(await self.join.Search('12As'))
-        await self.assertIsNone(await self.join.Search('fdsfdfdsfdsfdshgdfwewsdf'))    
-
-    async def test_get_channel(self):
-        await self.assertIsNotNone(self.join.GetChannels())
+class TestSMSActivate(unittest.TestCase):
+    def test_Balance(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertEqual(sms.Balance(), 389.98)
 
 
 
