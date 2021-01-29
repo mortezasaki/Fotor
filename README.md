@@ -16,3 +16,4 @@ https://sms-activate.ru/en/api2//
 * [x] Get All Available Countries
 * [x] Get Price by country
 * [x] Sort country by cost
+* [x] Get Number by country
