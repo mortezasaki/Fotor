@@ -11,6 +11,10 @@ class TestUtility(unittest.TestCase):
         self.assertFalse(utility.ValidatePhone('98916'))
         self.assertFalse(utility.ValidatePhone('98916test8'))
 
+    def test_Sort(self):
+        x = {1: 2, 3: 4, 4: 3, 2: 1, 0: 0}
+        self.assertEqual(utility.SortDic(x), {0: 0, 2: 1, 1: 2, 4: 3, 3: 4})
+
 class TestJoin(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestJoin, self).__init__(*args, **kwargs)
@@ -36,7 +40,11 @@ class TestSMSActivate(unittest.TestCase):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertEqual(sms.GetPrice(0),7.00)
         self.assertEqual(sms.GetPrice(1),11.00)
-
+    
+    # @unittest.skip("Take a long time") 
+    def test_SortCountriesByPrice(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertIsNotNone(sms.SortCountriesByPrice())
 
 
 if __name__ == '__main__':

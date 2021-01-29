@@ -74,7 +74,19 @@ class SMSActivate:
                 return None
         return None
 
+    def SortCountriesByPrice(self):
+        countries = self.GetCountry()
 
+        if countries is not None:
+            costs = {}
+
+            for country in countries.keys():
+                price = self.GetPrice(country)
+                if price is not None:
+                    costs[country] = price
+            sorted_costs = utility.SortDic(costs)
+            return sorted_costs
+        return None
 
 # class SignUp:
 
