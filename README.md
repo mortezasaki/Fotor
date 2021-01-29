@@ -10,3 +10,7 @@ https://sms-activate.ru/en/api2//
 * Get activation code https://sms-activate.ru/stubs/handler_api.php?api_key=376c29Ace3AA9A9f252d2c76c632f0bd&action=getStatus&id=382267527
  * activation code or waiting for code
 * Get balance https://sms-activate.ru/stubs/handler_api.php?api_key=376c29Ace3AA9A9f252d2c76c632f0bd&action=getBalance
+
+## Tasks
+* [x] Check Balance
+* [x] Get All Available Countries
