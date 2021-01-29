@@ -28,14 +28,18 @@ class TestJoin(unittest.TestCase):
         self.assertFalse(self.join.ValidUsername('12As'))
 
 class TestSMSActivate(unittest.TestCase):
+    
+    @unittest.skip('Take money')
     def test_Balance(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertEqual(sms.Balance(), 389.98)
 
+    @unittest.skip('Take money')
     def test_GetCountry(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertIsNotNone(sms.GetCountry())
     
+    @unittest.skip('Take money')
     def test_GetPrice(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertEqual(sms.GetPrice(0),7.00)
@@ -46,18 +50,25 @@ class TestSMSActivate(unittest.TestCase):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertIsNotNone(sms.SortCountriesByPrice())
 
+    @unittest.skip('Take money')
     def test_GetNumber(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertIsNotNone(sms.GetNumber(2))
 
     @unittest.skip('Take money')
-    def test_CancelCode(self):
+    def test_ConfirmCode(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
-        self.assertIsTrue(sms.ConfirmCode('384608665'))
+        self.assertTrue(sms.ConfirmCode('384618485'))
 
+    @unittest.skip('Take money')
     def test_CancelCode(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
-        self.assertTrue(sms.CancelCode('384609854'))
+        self.assertTrue(sms.CancelCode('384616712'))
+
+    @unittest.skip('Take money')
+    def test_GetActivationCode(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertIsNotNone(sms.GetActivationCode('384625843'))
 
 
 if __name__ == '__main__':
