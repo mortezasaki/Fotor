@@ -22,3 +22,4 @@ https://sms-activate.ru/en/api2//
   * [x] Cancel Number
 * [x] Get Activation Code
 * [x] Fake Name Generator
+* [x] Fake Device Generator
