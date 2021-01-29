@@ -31,6 +31,12 @@ class TestSMSActivate(unittest.TestCase):
     def test_GetCountry(self):
         sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
         self.assertIsNotNone(sms.GetCountry())
+    
+    def test_GetPrice(self):
+        sms = SMSActivate('376c29Ace3AA9A9f252d2c76c632f0bd')
+        self.assertEqual(sms.GetPrice(0),7.00)
+        self.assertEqual(sms.GetPrice(1),11.00)
+
 
 
 if __name__ == '__main__':

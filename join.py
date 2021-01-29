@@ -50,16 +50,30 @@ class SMSActivate:
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key=%s&action=getCountries' % self.api_key
         req = requests.get(url)
 
-        if req.status_code == 200: 
-            res = req.json()
-            countries = {}
-            for _id,names in res.items():
-                countries[_id] =  names['eng']
-            return countries
+        if req.status_code == 200:
+            try: 
+                res = req.json()
+                countries = {}
+                for _id,names in res.items():
+                    countries[_id] =  names['eng']
+                return countries
+            except:
+                return None
         else:
             return None
 
-                
+    def GetPrice(self, country_code, service : str = 'tg'):
+        url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getPrices&service={1}&country={2}'.format(self.api_key, service, country_code)
+        req = requests.get(url)        
+
+        if req.status_code == 200:
+            try:
+                res = req.json()
+                return res[str(country_code)][service]['cost']
+            except:
+                return None
+        return None
+
 
 
 # class SignUp:
