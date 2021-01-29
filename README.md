@@ -17,3 +17,6 @@ https://sms-activate.ru/en/api2//
 * [x] Get Price by country
 * [x] Sort country by cost
 * [x] Get Number by country
+* [x] Change Number Status
+  * [x] Confirm Number
+  * [x] Cancel Number
