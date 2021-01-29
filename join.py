@@ -295,6 +295,6 @@ if __name__ == "__main__":
                 except errors.UserDeactivatedBanError:
                     logging.info('The user has been banned')
                 except Exception as e:
-                    logging.info(str(e))
+                    logging.info(str(e)) 
 
 
