@@ -13,3 +13,4 @@ https://sms-activate.ru/en/api2//
 
 ## Tasks
 * [x] Check Balance
+* [x] Get All Available Countries
