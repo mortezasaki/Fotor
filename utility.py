@@ -54,7 +54,9 @@ def GetProxy(retry : int = 5, wait : float = 5):
             text = req.text
             soup = BeautifulSoup(text, 'html.parser')
             rows = soup.findAll('tr')
-            for row in rows:
+            for row in rows[1:]:
+                if not random.choice([True, False]): # for randomize selction proxy
+                    continue
                 cols = row.findAll('td')
                 if len(cols)>1:
                     # matching IPv4 Addresss https://www.oreilly.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
