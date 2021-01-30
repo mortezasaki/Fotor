@@ -1,6 +1,6 @@
 import unittest
 import utility
-from join import Join, SMSActivate
+# from join import SMSActivate
 import asyncio
 import warnings
 class TestUtility(unittest.TestCase):
@@ -25,20 +25,24 @@ class TestUtility(unittest.TestCase):
     
     def test_RandomCharacters(self):
         random_char = utility.RandomCharacters()
-        print (random_char)
         self.assertIsNotNone(random_char)
+
+    def test_GetProxy(self):
+        proxy = utility.GetProxy()
+        self.assertIsNotNone(proxy)
+
 
 class TestJoin(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestJoin, self).__init__(*args, **kwargs)
-        self.join = Join('639657163753')
+        # self.join = Join('639657163753')
 
-    def test_valid_username(self):
-        self.assertTrue(self.join.ValidUsername('Morteza'))
-        self.assertTrue(self.join.ValidUsername('Mor43443'))
-        self.assertFalse(self.join.ValidUsername('1234344'))
-        self.assertFalse(self.join.ValidUsername('dsfd'))
-        self.assertFalse(self.join.ValidUsername('12As'))
+    # def test_valid_username(self):
+    #     self.assertTrue(self.join.ValidUsername('Morteza'))
+    #     self.assertTrue(self.join.ValidUsername('Mor43443'))
+    #     self.assertFalse(self.join.ValidUsername('1234344'))
+    #     self.assertFalse(self.join.ValidUsername('dsfd'))
+    #     self.assertFalse(self.join.ValidUsername('12As'))
 
 class TestSMSActivate(unittest.TestCase):
     
