@@ -26,3 +26,4 @@ https://sms-activate.ru/en/api2//
 * [x] Generate Random Version
 * [x] Sign up in Telegram
 * [x] Join to channels
+* [x] Get Proxy for Telegram
