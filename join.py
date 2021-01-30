@@ -22,10 +22,10 @@ from time import sleep
 from api import API
 from enums import *
 import requests
+import socks
 
 
 logging.getLogger().setLevel(logging.INFO)
-
 
 class SMSActivate:
     def __init__(self, api_key : str):
@@ -150,9 +150,20 @@ class Telegram:
 
         self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
 
-        self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-            device_model = android_model , system_version = utility.RandomCharacters(), app_version = utility.RandomCharacters(size = 5),
-            flood_sleep_threshold = Config['flood_sleep_threshold'])
+        proxy = utility.GetProxy()
+        if proxy is not None:
+            # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
+            host = proxy['IP']  # a valid host
+            port = int(proxy['Port'])  # a valid port
+            proxy = (socks.SOCKS4, host, port)
+
+            self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+                flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
+        else:
+            self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+                flood_sleep_threshold = Config['flood_sleep_threshold'])            
 
     def ValidUsername(self, username : str):
         pattern = r'^[a-zA-Z]\w{5,}$'
@@ -224,6 +235,7 @@ class Telegram:
         print(channels)
         return channels
 
+
 if __name__ == "__main__":
     logging.info("Start Fotor...")
 
@@ -237,8 +249,11 @@ if __name__ == "__main__":
     countries = sms_activate.SortCountriesByPrice()
 
     is_signup = False
+    ignore_countries = ['6']
 
     for country_code,cost in countries.items():
+        if country_code in ignore_countries:
+            continue
         logging.info('Country {0}, Cost {1}'.format(country_code, cost))
         if cost <= balance:
             phone_number = sms_activate.GetNumber(country_code)
@@ -294,6 +309,7 @@ if __name__ == "__main__":
                     sleep(1)
                 except errors.UserDeactivatedBanError:
                     logging.info('The user has been banned')
+                    exit()
                 except Exception as e:
                     logging.info(str(e)) 
 
