@@ -47,6 +47,9 @@ def RandomCharacters(size : int = 8, chars = string.ascii_letters + string.digit
     return ''.join(random.choice(chars) for _ in range(size))
 
 def GetProxy(retry : int = 5, wait : float = 5, method : int = 2):
+    # country that Censorship Telegram https://en.wikipedia.org/wiki/Telegram_(software)#Censorship
+    country_ignore = ['RU', 'IR' , 'CN', 'PK', 'AZ' , 'BH', 'BY', 'HK', 'IN', 'ID', 'TH']
+    
     if method == 1:
         url = r'http://www.freeproxylists.net/?c=&pt=&pr=HTTPS&a%5B%5D=0&a%5B%5D=1&a%5B%5D=2&u=0'
         for i in range(retry):
