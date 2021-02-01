@@ -26,7 +26,10 @@ import socks
 
 
 logging.getLogger().setLevel(logging.INFO)
+LOG = "logs.log"                                                     
+# logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
 
+loop = asyncio.get_event_loop()
 class SMSActivate:
     def __init__(self, api_key : str):
         self.api_key = api_key
@@ -75,13 +78,17 @@ class SMSActivate:
                 return None
         return None
 
-    def SortCountriesByPrice(self):
+    def SortCountriesByPrice(self, limit = 20):
         countries = self.GetCountry()
 
         if countries is not None:
             costs = {}
-
+            count = 0
             for country in countries.keys():
+                if count < limit or limit <= 0:
+                    count+=1
+                else:
+                    break
                 price = self.GetPrice(country)
                 if price is not None:
                     costs[country] = price
@@ -145,25 +152,40 @@ class Telegram:
         if not os.path.exists(Config['account_path']):
             os.makedirs(Config['account_path'])
 
-        android_model = utility.AndroidDeviceGenerator()
-        android_model = android_model if android_model is not None else Config['android_model']
+        # android_model = utility.AndroidDeviceGenerator()
+        # android_model = android_model if android_model is not None else Config['android_model']
 
-        self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
+        # self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
 
-        proxy = utility.GetProxy()
-        if proxy is not None:
-            # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
-            host = proxy['IP']  # a valid host
-            port = int(proxy['Port'])  # a valid port
-            proxy = (socks.SOCKS4, host, port)
+        # proxies = utility.GetProxy()
+        # proxy_fail = True
+        # if proxies is not None:
+        #     for proxy in proxies:
+        #         try:
+        #             # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
+        #             host = proxy['IP']  # a valid host
+        #             port = int(proxy['Port'])  # a valid port
+        #             logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
+        #             proxy = (socks.HTTP, host, port)
 
-            self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-                device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-                flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
-        else:
-            self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-                device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-                flood_sleep_threshold = Config['flood_sleep_threshold'])            
+        #             self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+        #                 device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+        #                 flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
+                    
+        #             loop.run_until_complete(self.tg_client.connect())
+        #             proxy_fail = False
+        #             break
+        #         except:
+        #             logging.info("Proxy not working")
+        #             continue
+        # if proxy_fail:
+        #     self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+        #         device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+        #         flood_sleep_threshold = Config['flood_sleep_threshold'], connection_retries=2)            
+
+        global loop
+        while not loop.run_until_complete(self.Login()):
+            pass
 
     def ValidUsername(self, username : str):
         pattern = r'^[a-zA-Z]\w{5,}$'
@@ -173,9 +195,6 @@ class Telegram:
     
 
     async def SendCode(self):
-        await self.tg_client.connect()
-        
-        await self.tg_client.connect()
         if self.tg_client.is_connected():
             try:
                 await self.tg_client.send_code_request(self.phone_number)
@@ -192,18 +211,38 @@ class Telegram:
             return False
 
     async def Login(self):
-        pass
-        # tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
-        # if os.path.exists(tg_session_location):
-        #     self.client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-        #         device_model = ConfSMS_Activate_APIig['device_model'], system_version = Config['system_version'], app_version = Config['app_version'],
-        #         flood_sleep_threshold = Config['flood_sleep_threshold'])
-        #     await self.client.connect()
-        #     if self.client.is_connected():
-        #         return True
-        #     return False
-        # else:
-        #     raise False
+        self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
+
+        # proxies = utility.GetProxy()
+        # if proxies is not None:
+        #     for proxy in proxies:
+        #         try:
+        #             # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
+        #             host = proxy['IP']  # a valid host
+        #             port = int(proxy['Port'])  # a valid port
+        #             logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
+        #             proxy = (socks.HTTP, host, port)
+
+        #             self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+        #                 device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+        #                 flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
+                    
+        #             await self.tg_client.connect()
+        #             return True
+        #             break
+        #         except Exception as e:
+        #             logging.info(str(e))
+        #             await self.tg_client.disconnect()
+        #             # await self.tg_client.log_out()
+        #             logging.info("Proxy not working")
+        #             continue
+        self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+            flood_sleep_threshold = Config['flood_sleep_threshold'], connection_retries=2)  
+        
+        await self.tg_client.connect()
+        
+        return True
 
     async def Search(self, username : str):
         if self.ValidUsername(username):
@@ -237,9 +276,8 @@ class Telegram:
 
 
 if __name__ == "__main__":
-    logging.info("Start Fotor...")
 
-    loop = asyncio.get_event_loop()
+    logging.info("Start Fotor...")
 
     sms_activate = SMSActivate(Config['SMS_Activate_API'])
     _api = ''
@@ -249,8 +287,11 @@ if __name__ == "__main__":
     countries = sms_activate.SortCountriesByPrice()
 
     is_signup = False
-    ignore_countries = ['6']
+    ignore_countries = []
 
+    activation_code = None
+
+    # Try to get phone number and activation code
     for country_code,cost in countries.items():
         if country_code in ignore_countries:
             continue
@@ -270,26 +311,31 @@ if __name__ == "__main__":
                     try:
                         activation_code = sms_activate.GetActivationCode(status)
                         if activation_code is not None:
-                            logging.info('Activation code is: %s' % activation_code)                    
-                            name = utility.FakeNameGenerator()
-                            if name is not None and len(name.split())>1:
-                                family = name.split()[1]
-                                name = name.split()[0]                                
-                            else:
-                                name, family = utility.RandomCharacters(), utility.RandomCharacters()
-                            
-                            logging.info('New user name = {0} {1}'.format(name, family))
-
-                            logging.info('Sign Up in Telegram...')
-                            is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
-                            if is_signup:
-                                sms_activate.ConfirmCode(status)
-                                _api = API(phone_number)
-                                _api.CallRegisterAPI(name, family ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value)
-                                logging.info('Complate %s sing up' % phone_number)
-                                break
+                            logging.info('Activation code is: %s' % activation_code)
+                            break
+                        sms_activate.CancelCode(status)
                     except:
                         sms_activate.CancelCode(status)
+
+    # after get activation code sign up to telegram
+    if activation_code is not None:
+        name = utility.FakeNameGenerator()
+        if name is not None and len(name.split())>1:
+            family = name.split()[1]
+            name = name.split()[0]                                
+        else:
+            name, family = utility.RandomCharacters(), utility.RandomCharacters()
+        
+        logging.info('New user name = {0} {1}'.format(name, family))
+
+        logging.info('Sign Up in Telegram...')
+        is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
+        if is_signup:
+            sms_activate.ConfirmCode(status)
+            _api = API(phone_number)
+            _api.CallRegisterAPI(name, family ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value)
+            logging.info('Complate %s sing up' % phone_number)
+
 
 
     if is_signup:
@@ -312,5 +358,6 @@ if __name__ == "__main__":
                     exit()
                 except Exception as e:
                     logging.info(str(e)) 
+                    telegram.Login()
 
 
