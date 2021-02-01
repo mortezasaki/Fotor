@@ -49,7 +49,8 @@ def RandomCharacters(size : int = 8, chars = string.ascii_letters + string.digit
 
 def GetProxy(retry : int = 5, wait : float = 5, method : int = 0):
     # country that Censorship Telegram https://en.wikipedia.org/wiki/Telegram_(software)#Censorship
-    country_ignore = ['RU', 'IR' , 'CN', 'PK', 'AZ' , 'BH', 'BY', 'HK', 'IN', 'ID', 'TH']
+    # country_ignore = ['RU', 'IR' , 'CN', 'PK', 'AZ' , 'BH', 'BY', 'HK', 'IN', 'ID', 'TH']
+    country_ignore = []
 
     if method == 0:
         for i in range(retry):
