@@ -29,7 +29,7 @@ import getopt
 
 logging.getLogger().setLevel(logging.INFO)
 LOG = "logs.log"                                                     
-logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
+# logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
 
 loop = asyncio.get_event_loop()
 class SMSActivate:
@@ -289,6 +289,30 @@ def ExistAccount(account : str):
         return True
     return False
 
+def AddToBan(account : str):
+    with open('ban.txt','a') as f:
+        f.write('%s\n' % account)
+
+def AddToAuthKeyUnregisteredError(account : str):
+    with open('autherror.txt','a') as f:
+        f.write('%s\n' % account)
+
+def AccountIsBanned(account : str):
+    with open('ban.txt','r') as f:
+        accounts = f.readlines()
+        for _account in accounts:
+            if account == _account.replace('\n',''):
+                return True
+    return False
+
+def AccountHasAuthProblem(account : str):
+    with open('autherror.txt','r') as f:
+        accounts = f.readlines()
+        for _account in accounts:
+            if account == _account.replace('\n',''):
+                return True
+    return False    
+
 if __name__ == "__main__":
 
     logging.info("Start Fotor...")
@@ -298,14 +322,21 @@ if __name__ == "__main__":
     login = False
     _api = ''
     telegram = ''
+    problem = False
     try: 
         opts, args = getopt.getopt(argv, "a:l:v", ["account=", "log=", 'verbose=',]) 
         for opt, arg in opts: 
             if opt in ['-a', '--account']: 
                 phone_number = arg
-                if ExistAccount(phone_number):
+                if ExistAccount(phone_number) and (not AccountIsBanned(phone_number) and not AccountHasAuthProblem(phone_number)):
                     login = True
                     break
+                else :
+                    exit()
+    except SystemExit:
+        logging.info('Account has problem')
+        exit()
+    
     except: 
         login = False
 
@@ -371,6 +402,7 @@ if __name__ == "__main__":
     else:
         telegram = Telegram(phone_number)
         _api = API(phone_number)
+        _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
         is_signup = True
     
     if is_signup :
@@ -390,7 +422,13 @@ if __name__ == "__main__":
                     sleep(1)
                 except errors.UserDeactivatedBanError:
                     logging.info('The user has been banned')
+                    AddToBan(phone_number)
                     exit()
+                except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+                    logging.info('Account has auth problem')
+                    AddToAuthKeyUnregisteredError(phone_number)
+                    exit()
+
                 except Exception as e:
                     print(type(e).__name__)
                     logging.info(str(e))
