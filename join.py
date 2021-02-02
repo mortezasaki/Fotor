@@ -298,20 +298,22 @@ def AddToAuthKeyUnregisteredError(account : str):
         f.write('%s\n' % account)
 
 def AccountIsBanned(account : str):
-    with open('ban.txt','r') as f:
-        accounts = f.readlines()
-        for _account in accounts:
-            if account == _account.replace('\n',''):
-                return True
+    if os.path.exists('ban.txt'):
+        with open('ban.txt','r') as f:
+            accounts = f.readlines()
+            for _account in accounts:
+                if account == _account.replace('\n',''):
+                    return True
     return False
 
 def AccountHasAuthProblem(account : str):
-    with open('autherror.txt','r') as f:
-        accounts = f.readlines()
-        for _account in accounts:
-            if account == _account.replace('\n',''):
-                return True
-    return False    
+    if os.path.exists('autherror.txt'):
+        with open('autherror.txt','r') as f:
+            accounts = f.readlines()
+            for _account in accounts:
+                if account == _account.replace('\n',''):
+                    return True
+        return False    
 
 if __name__ == "__main__":
 
