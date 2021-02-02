@@ -239,7 +239,7 @@ class Telegram:
         #             logging.info("Proxy not working")
         #             continue
         self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1', connection_retries=2)  
+            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
         
         await self.tg_client.connect()
         return True
@@ -322,7 +322,6 @@ if __name__ == "__main__":
     login = False
     _api = ''
     telegram = ''
-    problem = False
     try: 
         opts, args = getopt.getopt(argv, "a:l:v", ["account=", "log=", 'verbose=',]) 
         for opt, arg in opts: 
@@ -427,6 +426,10 @@ if __name__ == "__main__":
                 except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                     logging.info('Account has auth problem')
                     AddToAuthKeyUnregisteredError(phone_number)
+                    exit()
+
+                except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+                    logging.info('Account has password')
                     exit()
 
                 except Exception as e:
