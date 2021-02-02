@@ -23,11 +23,13 @@ from api import API
 from enums import *
 import requests
 import socks
+import getopt 
+
 
 
 logging.getLogger().setLevel(logging.INFO)
 LOG = "logs.log"                                                     
-# logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
+logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
 
 loop = asyncio.get_event_loop()
 class SMSActivate:
@@ -281,70 +283,97 @@ class Telegram:
         return channels
 
 
+def ExistAccount(account : str):
+    account_location = "%s%s.session" % (Config['account_path'],account)
+    if os.path.exists(account_location):
+        return True
+    return False
+
 if __name__ == "__main__":
 
     logging.info("Start Fotor...")
 
-    sms_activate = SMSActivate(Config['SMS_Activate_API'])
+    argv = sys.argv[1:] 
+
+    login = False
     _api = ''
     telegram = ''
-    balance = sms_activate.Balance()
-    logging.info("Your balance at sms-activate.rus is: %s" % balance)
-    countries = sms_activate.SortCountriesByPrice()
+    try: 
+        opts, args = getopt.getopt(argv, "a:l:v", ["account=", "log=", 'verbose=',]) 
+        for opt, arg in opts: 
+            if opt in ['-a', '--account']: 
+                phone_number = arg
+                if ExistAccount(phone_number):
+                    login = True
+                    break
+    except: 
+        login = False
 
-    is_signup = False
-    ignore_countries = []
 
-    activation_code = None
-
-    # Try to get phone number and activation code
-    for country_code,cost in countries.items():
-        if country_code in ignore_countries:
-            continue
-        logging.info('Country {0}, Cost {1}'.format(country_code, cost))
-        if cost <= balance:
-            phone_number = sms_activate.GetNumber(country_code)
-            if phone_number is not None:
-                status = phone_number['Status']
-                phone_number = phone_number['Phone']
-                logging.info('Status: {0}, Phone Number: {1}'.format(status, phone_number))
-                logging.info('Start Telethon...')
-                telegram = Telegram(phone_number)
-                connect_to_telegram = loop.run_until_complete(telegram.SendCode())
-                if connect_to_telegram:
-                    logging.info('The activation code telegram was sent')
-                    logging.info('Wait for activation code...')
-                    try:
-                        activation_code = sms_activate.GetActivationCode(status)
-                        if activation_code is not None:
-                            logging.info('Activation code is: %s' % activation_code)
-                            break
-                        sms_activate.CancelCode(status)
-                    except:
-                        sms_activate.CancelCode(status)
-
-    # after get activation code sign up to telegram
-    if activation_code is not None:
-        name = utility.FakeNameGenerator()
-        if name is not None and len(name.split())>1:
-            family = name.split()[1]
-            name = name.split()[0]                                
-        else:
-            name, family = utility.RandomCharacters(), utility.RandomCharacters()
+    if not login:
+        sms_activate = SMSActivate(Config['SMS_Activate_API'])
         
-        logging.info('New user name = {0} {1}'.format(name, family))
 
-        logging.info('Sign Up in Telegram...')
-        is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
-        if is_signup:
-            sms_activate.ConfirmCode(status)
-            _api = API(phone_number)
-            _api.CallRegisterAPI(name, family ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value)
-            logging.info('Complate %s sing up' % phone_number)
+        balance = sms_activate.Balance()
+        logging.info("Your balance at sms-activate.rus is: %s" % balance)
+        countries = sms_activate.SortCountriesByPrice()
 
+        is_signup = False
+        ignore_countries = []
 
+        activation_code = None
 
-    if is_signup:
+        # Try to get phone number and activation code
+        for country_code,cost in countries.items():
+            if country_code in ignore_countries:
+                continue
+            logging.info('Country {0}, Cost {1}'.format(country_code, cost))
+            if cost <= balance:
+                phone_number = sms_activate.GetNumber(country_code)
+                if phone_number is not None:
+                    status = phone_number['Status']
+                    phone_number = phone_number['Phone']
+                    logging.info('Status: {0}, Phone Number: {1}'.format(status, phone_number))
+                    logging.info('Start Telethon...')
+                    telegram = Telegram(phone_number)
+                    connect_to_telegram = loop.run_until_complete(telegram.SendCode())
+                    if connect_to_telegram:
+                        logging.info('The activation code telegram was sent')
+                        logging.info('Wait for activation code...')
+                        try:
+                            activation_code = sms_activate.GetActivationCode(status)
+                            if activation_code is not None:
+                                logging.info('Activation code is: %s' % activation_code)
+                                break
+                            sms_activate.CancelCode(status)
+                        except:
+                            sms_activate.CancelCode(status)
+
+        # after get activation code sign up to telegram
+        if activation_code is not None:
+            name = utility.FakeNameGenerator()
+            if name is not None and len(name.split())>1:
+                family = name.split()[1]
+                name = name.split()[0]                                
+            else:
+                name, family = utility.RandomCharacters(), utility.RandomCharacters()
+            
+            logging.info('New user name = {0} {1}'.format(name, family))
+
+            logging.info('Sign Up in Telegram...')
+            is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
+            if is_signup:
+                sms_activate.ConfirmCode(status)
+                _api = API(phone_number)
+                _api.CallRegisterAPI(name, family ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value)
+                logging.info('Complate %s sing up' % phone_number)
+
+    else:
+        telegram = Telegram(phone_number)
+        _api = API(phone_number)
+        is_signup = True
+    
+    if is_signup :
         logging.info('Start joining...')
         
         while True:
@@ -363,6 +392,7 @@ if __name__ == "__main__":
                     logging.info('The user has been banned')
                     exit()
                 except Exception as e:
+                    print(type(e).__name__)
                     logging.info(str(e))
                     loop.run_until_complete(telegram.Login())
 
