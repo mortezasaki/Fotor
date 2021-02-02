@@ -2,6 +2,7 @@ import requests
 from errors import *
 from enums import *
 from time import sleep
+import logging
 
 class API:
 
@@ -23,7 +24,9 @@ class API:
                         # self.SaveAccountInfo(self.phone_number, name, family, gender, country, str(status), str(res_status))
                         return True
             except ConnectionError:
-                continue
+                logging.info('Exception ConnectionError')
+            except Exception as e:
+                logging.info(type(e).__name__)            
             sleep(wait)
         return False
         # raise FaildAPIConnection() # Error when can't connect to Membersgram api
@@ -38,6 +41,8 @@ class API:
                 return req.json()['data']
         except ConnectionError:
             return None
+        except Exception as e:
+            logging.info(type(e).__name__)
         return None
 
     def CallJoin(self, _id : str):
@@ -51,7 +56,10 @@ class API:
                 if res == 200:
                     return True
         except ConnectionError:
-            return False                    
+            return False
+        except Exception as e:
+            logging.info(type(e).__name__)                          
+            return False
         return False
 
 
