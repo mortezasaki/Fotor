@@ -237,11 +237,9 @@ class Telegram:
         #             logging.info("Proxy not working")
         #             continue
         self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-            flood_sleep_threshold = Config['flood_sleep_threshold'], connection_retries=2)  
+            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1', connection_retries=2)  
         
         await self.tg_client.connect()
-        
         return True
 
     async def Search(self, username : str):
@@ -252,18 +250,26 @@ class Telegram:
                 return None
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
+                logging.info('Disconnect...')
+                await self.tg_client.disconnect()
                 sleep(e.seconds)
+                logging.info('Connect and login...')
+                await self.Login()                
         return None
 
     async def JoinChannel(self, username : str):
-        if self.Search(username):
+        if await self.Search(username):
             try :
                 return await self.tg_client(JoinChannelRequest(username))
             except ValueError:  
                 return None
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
+                logging.info('Disconnect...')
+                await self.tg_client.disconnect()
                 sleep(e.seconds)
+                logging.info('Connect and login...')
+                await self.Login()
         return None
 
     async def GetChannels(self):
@@ -357,7 +363,7 @@ if __name__ == "__main__":
                     logging.info('The user has been banned')
                     exit()
                 except Exception as e:
-                    logging.info(str(e)) 
-                    telegram.Login()
+                    logging.info(str(e))
+                    loop.run_until_complete(telegram.Login())
 
 
