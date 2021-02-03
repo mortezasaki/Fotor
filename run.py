@@ -69,6 +69,15 @@ class FotorShell(cmd.Cmd):
         process_list.append(fotor)
         self.do_log(len(process_list)-1)
 
+    def do_kill(self, arg):
+        'Terminate a process'
+        # https://stackoverflow.com/a/17858114/9850815
+        p = psutil.Process(int(arg))
+        cmdline = ' '.join(p.cmdline())
+        if 'join.py' in cmdline:
+            p.terminate()
+
+
 
     def do_exit(self, arg):
         'Exit from shell'
