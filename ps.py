@@ -5,11 +5,7 @@ import subprocess
 
 def start(executable_file):
     return subprocess.Popen(
-        executable_file,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True # For parameter in start
+        executable_file
     )
 
 # https://stackoverflow.com/a/43276598/9850815
