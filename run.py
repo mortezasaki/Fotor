@@ -1,6 +1,8 @@
 import cmd
 import ps
 from time import sleep
+import psutil
+
 
 logo = '''
                                                                                                        
@@ -41,10 +43,13 @@ class FotorShell(cmd.Cmd):
 
     def do_list(self, arg):
         'List of all running accounts'
-        print(f'{"Index":<10}', f'{"ProcessId":<10}')
-        for id, process in enumerate(process_list):
-            if ps.is_running(process):
-                print(f'{id:<10}', f'{process.pid:<10}')
+        print(f'{"ProcessId":<10}', f'{"ProcessName":<10}')
+
+        # Get list of running process https://stackoverflow.com/a/43065994/9850815
+        for p in psutil.process_iter():
+            cmdline = ' '.join(p.cmdline())
+            if 'join.py' in p.name() or 'join.py' in cmdline:
+                print(f'{p.pid:<10}', f'{cmdline:<10}')
 
     def do_log(self, arg):
         'Log a joiner'
