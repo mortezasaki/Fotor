@@ -335,7 +335,7 @@ if __name__ == "__main__":
                 else :
                     exit()
     except SystemExit:
-        logging.info('Account has problem')
+        logging.info('Account has problem maybe it banned')
         exit()
     
     except: 
@@ -348,6 +348,7 @@ if __name__ == "__main__":
 
         balance = sms_activate.Balance()
         logging.info("Your balance at sms-activate.rus is: %s" % balance)
+        exit()
         countries = sms_activate.SortCountriesByPrice()
 
         is_signup = False
