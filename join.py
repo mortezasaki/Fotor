@@ -226,32 +226,35 @@ class Telegram:
         except:
             return False
 
-    async def Login(self):
+    async def Login(self, use_proxy = False):
         self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
 
-        # proxies = utility.GetProxy()
-        # if proxies is not None:
-        #     for proxy in proxies:
-        #         try:
-        #             # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
-        #             host = proxy['IP']  # a valid host
-        #             port = int(proxy['Port'])  # a valid port
-        #             logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
-        #             proxy = (socks.HTTP, host, port)
 
-        #             self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-        #                 device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-        #                 flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
-                    
-        #             await self.tg_client.connect()
-        #             return True
-        #             break
-        #         except Exception as e:
-        #             logging.info(str(e))
-        #             await self.tg_client.disconnect()
-        #             # await self.tg_client.log_out()
-        #             logging.info("Proxy not working")
-        #             continue
+        if use_proxy:
+            proxies = utility.GetProxy()
+            if proxies is not None:
+                for proxy in proxies:
+                    try:
+                        # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
+                        host = proxy['IP']  # a valid host
+                        port = int(proxy['Port'])  # a valid port
+                        logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
+                        proxy = (socks.HTTP, host, port)
+
+                        self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+                            flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
+                        
+                        await self.tg_client.connect()
+                        return True
+                        break
+                    except Exception as e:
+                        logging.info(str(e))
+                        await self.tg_client.disconnect()
+                        # await self.tg_client.log_out()
+                        logging.info("Proxy not working")
+                        continue
+        
         self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
             device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
         
@@ -332,27 +335,32 @@ def AccountHasAuthProblem(account : str):
 def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     logging.info("Start Fotor...")
-
     argv = sys.argv[1:] 
 
     login = False
     _api = ''
     telegram = ''
+    phone_number = ''
     try: 
-        opts, args = getopt.getopt(argv, "a:l:v", ["account=", "log=", 'verbose=',]) 
+        opts, args = getopt.getopt(argv, shortopts='a:l:v', longopts = ["account=", "log=", "verbose"]) 
         for opt, arg in opts: 
+            logging.info(opt)
             if opt in ['-a', '--account']: 
                 phone_number = arg
                 if ExistAccount(phone_number) and (not AccountIsBanned(phone_number) and not AccountHasAuthProblem(phone_number)):
+                    logging.info('Start login to %s' % phone_number)
                     login = True
                     break
                 else :
-                    exit()
+                    logging.info('Account has problem or maybe it banned or not exist')
+                    exit(1)
     except SystemExit:
-        logging.info('Account has problem maybe it banned')
+        logging.info('Account has problem or maybe it banned or not exist')
         exit()
     
-    except: 
+    except Exception as e:
+        logging.info(str(e))
+        logging.info(type(e).__name__)
         login = False
 
 
@@ -361,7 +369,7 @@ def main():
         
 
         balance = sms_activate.Balance()
-        logging.info("Your balance at sms-activate.rus is: %s" % balance)
+        logging.info("Your balance at sms-activate.ru is: %s" % balance)
         countries = sms_activate.SortCountriesByPrice()
 
         is_signup = False
@@ -374,7 +382,6 @@ def main():
             if country_code in ignore_countries:
                 continue
             logging.info('Country {0}, Cost {1}'.format(country_code, cost))
-            sleep(1000)
             if cost <= balance:
                 phone_number = sms_activate.GetNumber(country_code)
                 if phone_number is not None:
@@ -428,13 +435,13 @@ def main():
             channel = _api.CallGetChannel()
             if channel is not None:
                 channel_username = channel['username']
-                logging.info('Join to %s' % channel_username)
+                logging.info('Joining to %s channel' % channel_username)
                 channel_id = channel['_id']
                 try:
                     loop.run_until_complete(telegram.Search(channel_username))
                     loop.run_until_complete(telegram.JoinChannel(channel_username))
                     if _api.CallJoin(channel_id):
-                        logging.info('Join was doned')
+                        logging.info('Join was done')
                     sleep(1)
                 except errors.UserDeactivatedBanError:
                     logging.info('The user has been banned')
@@ -456,7 +463,7 @@ def main():
 
 
 def handler(signum, frame):
-    print("Please use exit to exit")
+    print("ctrl+c")
 
 if __name__ == "__main__":
     main()

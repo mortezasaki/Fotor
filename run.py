@@ -2,6 +2,32 @@ import cmd
 import ps
 from time import sleep
 
+logo = '''
+                                                                                                       
+                                                                                                       
+FFFFFFFFFFFFFFFFFFFFFF     OOOOOOOOO     TTTTTTTTTTTTTTTTTTTTTTT     OOOOOOOOO     RRRRRRRRRRRRRRRRR   
+F::::::::::::::::::::F   OO:::::::::OO   T:::::::::::::::::::::T   OO:::::::::OO   R::::::::::::::::R  
+F::::::::::::::::::::F OO:::::::::::::OO T:::::::::::::::::::::T OO:::::::::::::OO R::::::RRRRRR:::::R 
+FF::::::FFFFFFFFF::::FO:::::::OOO:::::::OT:::::TT:::::::TT:::::TO:::::::OOO:::::::ORR:::::R     R:::::R
+  F:::::F       FFFFFFO::::::O   O::::::OTTTTTT  T:::::T  TTTTTTO::::::O   O::::::O  R::::R     R:::::R
+  F:::::F             O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R::::R     R:::::R
+  F::::::FFFFFFFFFF   O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R::::RRRRRR:::::R 
+  F:::::::::::::::F   O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R:::::::::::::RR  
+  F:::::::::::::::F   O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R::::RRRRRR:::::R 
+  F::::::FFFFFFFFFF   O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R::::R     R:::::R
+  F:::::F             O:::::O     O:::::O        T:::::T        O:::::O     O:::::O  R::::R     R:::::R
+  F:::::F             O::::::O   O::::::O        T:::::T        O::::::O   O::::::O  R::::R     R:::::R
+FF:::::::FF           O:::::::OOO:::::::O      TT:::::::TT      O:::::::OOO:::::::ORR:::::R     R:::::R
+F::::::::FF            OO:::::::::::::OO       T:::::::::T       OO:::::::::::::OO R::::::R     R:::::R
+F::::::::FF              OO:::::::::OO         T:::::::::T         OO:::::::::OO   R::::::R     R:::::R
+FFFFFFFFFFF                OOOOOOOOO           TTTTTTTTTTT           OOOOOOOOO     RRRRRRRR     RRRRRRR
+                                                                                                       
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+'''
+
+
+
+
 process_list = []
 class FotorShell(cmd.Cmd):
     intro = 'Welcome to the Fotor shell.'
@@ -11,17 +37,7 @@ class FotorShell(cmd.Cmd):
         'Create new telegram account'
         new_fotor = ps.start(['python', 'join.py', '--log' ,'debug', '-v'])
         process_list.append(new_fotor)
-        # print('Prees CTRL+C to exit')
-        # sleep(1)
-        # while ps.is_running(new_fotor):
-        #     try:
-        #         ps.tail('logs/%s.log' % new_fotor.pid)
-        #         # process_output, _ =  new_fotor.communicate()
-        #         # process_log = ps.read(new_fotor)
-        #         # if process_log is not None:
-        #         #     print(process_log)
-        #     except KeyboardInterrupt:
-        #         break
+        self.do_log(len(process_list)-1)
 
     def do_list(self, arg):
         'List of all running accounts'
@@ -31,17 +47,22 @@ class FotorShell(cmd.Cmd):
                 print(f'{id:<10}', f'{process.pid:<10}')
 
     def do_log(self, arg):
-        arg = int(arg)
-        while ps.is_running(process_list[arg]):
-            try:
-                ps.tail('logs/%s.log' % process_list[arg].pid)
-                # process_output, _ =  new_fotor.communicate()
-                # process_log = ps.read(new_fotor)
-                # if process_log is not None:
-                #     print(process_log)
-            except KeyboardInterrupt:
-                return True
-            
+        'Log a joiner'
+        try:
+            arg = int(arg)
+            while ps.is_running(process_list[arg]):
+                try:
+                    ps.tail('logs/%s.log' % process_list[arg].pid)
+                except KeyboardInterrupt:
+                    break
+        except IndexError:
+            print('Index error')
+
+    def do_login(self, arg):
+        'Login to the exist account'
+        fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
+        process_list.append(fotor)
+        self.do_log(len(process_list)-1)
 
 
     def do_exit(self, arg):
@@ -64,4 +85,5 @@ class FotorShell(cmd.Cmd):
 
 
 if __name__ == '__main__':
+    print(logo)
     FotorShell().cmdloop()

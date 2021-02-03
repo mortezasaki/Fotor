@@ -7,7 +7,8 @@ from time import sleep
 
 def start(executable_file):
     return subprocess.Popen(
-        executable_file
+        executable_file,
+        stdout=subprocess.PIPE
     )
 
 # https://stackoverflow.com/a/43276598/9850815
@@ -43,5 +44,5 @@ def tail(filename):
 
     while True:
         if p.poll(1):
-            print (str(f.stdout.readline()).replace('\n',''))
+            print (f.stdout.readline().decode("utf-8").strip())
         sleep(1)
