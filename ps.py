@@ -12,6 +12,12 @@ def start(executable_file):
         shell=True # For parameter in start
     )
 
+# https://stackoverflow.com/a/43276598/9850815
+def is_running(process):
+    poll = process.poll()
+    if poll is None:
+        return True
+    return False
 
 def read(process):
     return process.stdout.readline().decode("utf-8").strip()
