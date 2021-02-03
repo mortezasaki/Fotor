@@ -2,7 +2,8 @@ import cmd
 import ps
 from time import sleep
 import psutil
-
+from join import SMSActivate
+from config import Config
 
 logo = '''
                                                                                                        
@@ -77,6 +78,10 @@ class FotorShell(cmd.Cmd):
         if 'join.py' in cmdline:
             p.terminate()
 
+    def do_balance(self, arg):
+        'Get sms-activate balance'
+        sms = SMSActivate(Config['SMS_Activate_API'])
+        print('sms-activate.ru balance is: %s' % sms.Balance())
 
 
     def do_exit(self, arg):
