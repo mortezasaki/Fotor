@@ -23,17 +23,25 @@ from api import API
 from enums import *
 import requests
 import socks
-import getopt 
+import getopt
+import signal
 
 
 # output log on stdout https://stackoverflow.com/a/14058475/9850815
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-root.addHandler(handler)
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+log_file_name = 'logs/%s.log' % os.getpid()
+
+logging.basicConfig(filename=log_file_name, filemode="w", level=logging.INFO,format = '%(asctime)s - %(message)s') 
+# root = logging.getLogger()
+# root.setLevel(logging.INFO)
+
+
+# #handler = logging.StreamHandler(sys.stdout)
+# #handler.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(asctime)s - %(message)s')
+# handler.setFormatter(formatter)
+# root.addHandler(handler)
 
 
 
@@ -321,8 +329,8 @@ def AccountHasAuthProblem(account : str):
                     return True
         return False    
 
-if __name__ == "__main__":
-
+def main():
+    signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     logging.info("Start Fotor...")
 
     argv = sys.argv[1:] 
@@ -354,7 +362,6 @@ if __name__ == "__main__":
 
         balance = sms_activate.Balance()
         logging.info("Your balance at sms-activate.rus is: %s" % balance)
-        exit()
         countries = sms_activate.SortCountriesByPrice()
 
         is_signup = False
@@ -367,6 +374,7 @@ if __name__ == "__main__":
             if country_code in ignore_countries:
                 continue
             logging.info('Country {0}, Cost {1}'.format(country_code, cost))
+            sleep(1000)
             if cost <= balance:
                 phone_number = sms_activate.GetNumber(country_code)
                 if phone_number is not None:
@@ -447,3 +455,8 @@ if __name__ == "__main__":
                     loop.run_until_complete(telegram.Login())
 
 
+def handler(signum, frame):
+    print("Please use exit to exit")
+
+if __name__ == "__main__":
+    main()
