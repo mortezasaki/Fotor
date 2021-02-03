@@ -26,10 +26,16 @@ import socks
 import getopt 
 
 
+# output log on stdout https://stackoverflow.com/a/14058475/9850815
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
-logging.getLogger().setLevel(logging.INFO)
-LOG = "logs.log"                                                     
-# logging.basicConfig(filename=LOG, filemode="w", level=logging.INFO)  
+
 
 loop = asyncio.get_event_loop()
 class SMSActivate:
