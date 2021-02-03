@@ -168,38 +168,41 @@ class Telegram:
         if not os.path.exists(Config['account_path']):
             os.makedirs(Config['account_path'])
 
-        # android_model = utility.AndroidDeviceGenerator()
-        # android_model = android_model if android_model is not None else Config['android_model']
-
-        # self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
-
-        # proxies = utility.GetProxy()
-        # proxy_fail = True
-        # if proxies is not None:
-        #     for proxy in proxies:
-        #         try:
-        #             # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
-        #             host = proxy['IP']  # a valid host
-        #             port = int(proxy['Port'])  # a valid port
-        #             logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
-        #             proxy = (socks.HTTP, host, port)
-
-        #             self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-        #                 device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-        #                 flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
-                    
-        #             loop.run_until_complete(self.tg_client.connect())
-        #             proxy_fail = False
-        #             break
-        #         except:
-        #             logging.info("Proxy not working")
-        #             continue
-        # if proxy_fail:
-        #     self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-        #         device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
-        #         flood_sleep_threshold = Config['flood_sleep_threshold'], connection_retries=2)            
-
         global loop
+
+        use_proxy = False
+        if use_proxy:
+            android_model = utility.AndroidDeviceGenerator()
+            android_model = android_model if android_model is not None else Config['android_model']
+
+            self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
+
+            proxies = utility.GetProxy()
+            proxy_fail = True
+            if proxies is not None:
+                for proxy in proxies:
+                    try:
+                        # Set proxy for telethon https://github.com/LonamiWebs/Telethon/issues/227
+                        host = proxy['IP']  # a valid host
+                        port = int(proxy['Port'])  # a valid port
+                        logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
+                        proxy = (socks.HTTP, host, port)
+
+                        self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                            device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+                            flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
+                        
+                        loop.run_until_complete(self.tg_client.connect())
+                        proxy_fail = False
+                        break
+                    except:
+                        logging.info("Proxy not working")
+                        continue
+            if proxy_fail:
+                self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                    device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
+                    flood_sleep_threshold = Config['flood_sleep_threshold'], connection_retries=2)            
+        
         while not loop.run_until_complete(self.Login()):
             pass
 
