@@ -9,6 +9,7 @@ from enums import SMSActivateSMSStatus
 class SMSActivate:
     def __init__(self, api_key : str):
         self.api_key = api_key
+        self.countries = {}
         
     def Balance(self):
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key=%s&action=getBalance' % self.api_key
@@ -33,10 +34,9 @@ class SMSActivate:
         if req.status_code == 200:
             try: 
                 res = req.json()
-                countries = {}
                 for _id,names in res.items():
-                    countries[_id] =  names['eng']
-                return countries
+                    self.countries[_id] =  names['eng']
+                return self.countries
             except:
                 return None
         else:
@@ -120,4 +120,9 @@ class SMSActivate:
                 if re.match(pattern, req.text):
                     return req.text.split(':')[1]
             sleep(wait)
-        return None 
+        return None
+    
+    def GetCountryName(self, _id : int):
+        if _id in self.countries.keys():
+            return self.countries[_id]
+        return None
