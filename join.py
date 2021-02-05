@@ -7,9 +7,8 @@
 از این کلاس برای جوین اتوماتیک در تلگرام استفاده میشود. ورودی این برنامه شماره تلفنی است که قبلا ثبت نام و لاگین شده است.
 با دریافت این شماره تلفن به دنبال یک سشن تلگرام میگردد و بعد از پیدا کردن آن وارد تلگرام میشود و شروع به جوین شدن میکند
 """
-
+ 
 import sys
-import utility 
 from config import Config
 import os
 import asyncio
@@ -20,10 +19,7 @@ from enums import *
 import getopt
 import signal
 from telegram import Telegram
-from sms_activate import SMSActivate
-
-
-loop = asyncio.get_event_loop()
+from database import Database
 
 def LogInit():
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
@@ -62,10 +58,7 @@ def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     LogInit()
     argv = sys.argv[1:] 
-
-    login = False
-    _api = ''
-    telegram = ''
+    loop = asyncio.get_event_loop()
     phone_number = ''
     try: 
         opts, args = getopt.getopt(argv, shortopts='a:l:v', longopts = ["account=", "log=", "verbose"]) 
@@ -91,24 +84,26 @@ def main():
 
 
     telegram = Telegram(phone_number)
-    _api = API(phone_number)
-    _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
-    
-    while True:
-        channel = _api.CallGetChannel()
-        if channel is not None:
-            channel_username = channel['username']
-            logging.info('Joining to %s channel' % channel_username)
-            channel_id = channel['_id']
-            try:
-                loop.run_until_complete(telegram.Search(channel_username))
-                loop.run_until_complete(telegram.JoinChannel(channel_username))
-                if _api.CallJoin(channel_id):
-                    logging.info('Join was done')
-                sleep(1)
-            except Exception as e:
-                print(type(e).__name__)
-                logging.info(str(e))
+    if loop.run_until_complete(telegram.Connect()):
+        _api = API(phone_number)
+        # _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
+        
+        while True:
+            channel = _api.CallGetChannel()
+            if channel is not None:
+                channel_username = channel['username']
+                logging.info('Joining to %s channel' % channel_username)
+                channel_id = channel['_id']
+                try:
+                    loop.run_until_complete(telegram.Search(channel_username))
+                    loop.run_until_complete(telegram.JoinChannel(channel_username))
+                    db = Database()
+                    db.Join(phone_number, channel_username)
+                    if _api.CallJoin(channel_id):
+                        logging.info('Join was done')
+                except Exception as e:
+                    print(type(e).__name__)
+                    logging.info(str(e))
 
 
 def handler(signum, frame):
