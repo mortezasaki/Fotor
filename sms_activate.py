@@ -54,7 +54,7 @@ class SMSActivate:
                 return None
         return None
 
-    def SortCountriesByPrice(self, limit = 20):
+    def SortCountriesByPrice(self, cost_threshold = 20, limit = 20):
         countries = self.GetCountry()
 
         if countries is not None:
