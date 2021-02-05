@@ -40,8 +40,7 @@ class Telegram:
             return False
 
     async def Connect(self, use_proxy = False):
-        self.tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
-
+        tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
 
         if use_proxy:
             proxies = utility.GetProxy()
@@ -54,7 +53,7 @@ class Telegram:
                         logging.info('Proxy address is {0}:{1} from {2}'.format(host,port,proxy['Country']))
                         proxy = (socks.HTTP, host, port)
 
-                        self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                        self.tg_client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
                             device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1',
                             flood_sleep_threshold = Config['flood_sleep_threshold'], proxy=proxy)
                         
@@ -69,7 +68,7 @@ class Telegram:
                         continue
         
         else:
-            self.tg_client = TelegramClient(self.tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+            self.tg_client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
                 device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
         
         await self.tg_client.connect()

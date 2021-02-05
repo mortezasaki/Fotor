@@ -9,6 +9,7 @@ import utility
 from api import API
 from enums import *
 from time import sleep
+from database import Database
 
 
 def main():
@@ -42,8 +43,7 @@ def main():
                 logging.info('Status: {0}, Phone Number: {1}'.format(status, phone_number))
                 logging.info('Start Telethon...')
                 telegram = Telegram(phone_number)
-                connect_to_telegram = loop.run_until_complete(telegram.SendCode())
-                if connect_to_telegram:
+                if loop.run_until_complete(telegram.Connect()) and loop.run_until_complete(telegram.SendCode()):
                     logging.info('The activation code telegram was sent')
                     logging.info('Wait for activation code...')
                     try:
@@ -71,8 +71,9 @@ def main():
         if is_signup:
             sms_activate.ConfirmCode(status)
             _api = API(phone_number)
-            _api.CallRegisterAPI(name, family ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value)
-            sleep(3)
+            _api.CallRegisterAPI(name, family ,Gender.Man.value,sms_activate.GetCountryName(country_code),status =TelegramRegisterStats.Succesfull.value)
+            db = Database()
+            db.NewAccount(phone_number, sms_activate.GetCountryName(country_code), name, family,0)
             logging.info('Complate %s sing up' % phone_number)
 
 def LogInit():

@@ -40,7 +40,8 @@ class Database:
     def NewAccount(self, phonenumber, country, firstname, family, gender):
         if utility.ValidatePhone(phonenumber):
             c = self.conn.cursor()
-            c.execute("INSERT INTO account VALUES ({phonenumber},{country},{firstname},{family},{gender},{datetime.datetime.now()})")
+            command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
+            c.execute(command)
             
             # Save (commit) the changes
             self.conn.commit()
@@ -53,8 +54,9 @@ class Database:
 
     def Join(self, phonenumber, channel):
         if utility.ValidatePhone(phonenumber):
-            c = conn.cursor()
-            c.execute("INSERT INTO joins VALUES ({phonenumber},{channel},{datetime.datetime.now()})")
+            c = self.conn.cursor()
+            command = "INSERT INTO joins (phonenumber, channel, date_join) VALUES ('%s','%s','%s')" % (phonenumber, channel, datetime.datetime.now())
+            c.execute(command)
             
             # Save (commit) the changes
             self.conn.commit()
@@ -64,3 +66,13 @@ class Database:
             self.conn.close()
             return True
         return False
+
+    def DeleteAll(self):
+            c = self.conn.cursor()
+            c.execute("delete  from account")
+            c.execute("delete  from joins")
+            self.conn.commit()
+
+            # We can also close the connection if we are done with it.
+            # Just be sure any changes have been committed or they will be lost.
+            self.conn.close()
