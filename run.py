@@ -2,10 +2,10 @@ import cmd
 import ps
 from time import sleep
 import psutil
-from join import SMSActivate
+from sms_activate import SMSActivate
 from config import Config
 
-logo = '''
+banner = '''
                                                                                                        
                                                                                                        
 FFFFFFFFFFFFFFFFFFFFFF     OOOOOOOOO     TTTTTTTTTTTTTTTTTTTTTTT     OOOOOOOOO     RRRRRRRRRRRRRRRRR   
@@ -38,7 +38,7 @@ class FotorShell(cmd.Cmd):
 
     def do_new(self, arg):
         'Create new telegram account'
-        new_fotor = ps.start(['python', 'join.py', '--log' ,'debug', '-v'])
+        new_fotor = ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
         process_list.append(new_fotor)
         self.do_log(len(process_list)-1)
 
@@ -54,21 +54,13 @@ class FotorShell(cmd.Cmd):
 
     def do_log(self, arg):
         'Log a joiner'
-        try:
-            arg = int(arg)
-            while ps.is_running(process_list[arg]):
-                try:
-                    ps.tail('logs/%s.log' % process_list[arg].pid)
-                except KeyboardInterrupt:
-                    break
-        except IndexError:
-            print('Index error')
+        ps.tail('logs/join.log',arg)
 
     def do_login(self, arg):
         'Login to the exist account'
         fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
         process_list.append(fotor)
-        self.do_log(len(process_list)-1)
+        self.do_log(arg)
 
     def do_kill(self, arg):
         'Terminate a process'
@@ -104,5 +96,5 @@ class FotorShell(cmd.Cmd):
 
 
 if __name__ == '__main__':
-    print(logo)
+    print(banner)
     FotorShell().cmdloop()
