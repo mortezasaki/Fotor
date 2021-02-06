@@ -46,7 +46,7 @@ class FotorShell(cmd.Cmd):
 
     def do_list(self, arg):
         'List of all running accounts'
-        print(f'{"ProcessId":<20}', f'{"PhoneNumber":<20}', f'{"Joins":<20}')
+        print(f'{"ProcessId":<20}', f'{"PhoneNumber":<20}', f'{"Joins":<20}', f'{"Status":<20}')
 
         # Get list of running process https://stackoverflow.com/a/43065994/9850815
         for p in psutil.process_iter():
@@ -55,7 +55,8 @@ class FotorShell(cmd.Cmd):
                 phone_number = GetPhoneFromCMDLine(cmdline)
                 db = Database()
                 joins = db.CountOfJoins(phone_number)
-                print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}')
+                status = db.GetStatus(phone_number)
+                print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}', f'{status:<20}')
 
     def do_log(self, arg):
         'Log a joiner'

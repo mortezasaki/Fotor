@@ -114,8 +114,6 @@ class Telegram:
                 print(type(e).__name__)
                 logging.info(str(e))
                 await self.Connect()                 
-            finally:
-                db.Close()
         return None
 
     async def JoinChannel(self, username : str):
@@ -154,8 +152,6 @@ class Telegram:
                 print(type(e).__name__)
                 logging.info(str(e))
                 await self.Connect()                 
-            finally:
-                db.Close()
         return None
 
     async def GetChannels(self):

@@ -55,8 +55,9 @@ class Database:
     def Join(self, phonenumber, channel):
         if utility.ValidatePhone(phonenumber):
             c = self.conn.cursor()
-            command = "INSERT INTO joins (phonenumber, channel, date_join) VALUES ('%s','%s','%s')" % (phonenumber, channel, datetime.datetime.now())
-            c.execute(command)
+            t = (phonenumber, channel, datetime.datetime.now(),)
+            command = "INSERT INTO joins (phonenumber, channel, date_join) VALUES (?,?,?)"
+            c.execute(command, t)
             
             # Save (commit) the changes
             self.conn.commit()
@@ -82,7 +83,9 @@ class Database:
             t = (phonenumber,)
             command = "Select * from joins where phonenumber=?"
             joins = self.conn.execute(command, t)
-            return len(joins.fetchall())
+            res = len(joins.fetchall())
+            self.conn.close()
+            return res
         return 0
 
     def UpdateStatus(self, phonenumber, status : int):
@@ -90,13 +93,13 @@ class Database:
         t = (status, phonenumber,)
         self.conn.execute(command, t)
         self.conn.commit()
+        self.conn.close()
         return True
 
     def GetStatus(self, phonenumber):
         command = "Select status from account where phonenumber=?"
         t = (phonenumber,)
         status = self.conn.execute(command, t)
-        return status.fetchone()[0]
-
-    def Close(self):
+        count = status.fetchone()[0]
         self.conn.close()
+        return count

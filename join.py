@@ -100,12 +100,12 @@ def main():
                         db = Database()
                         db.Join(phone_number, channel_username)
                         db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
-                        db.Close()
                         if _api.CallJoin(channel_id):
                             logging.info('Join was done')
                 except Exception as e:
                     print(type(e).__name__)
                     logging.info(str(e))
+
 
 
 def handler(signum, frame):
