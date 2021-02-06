@@ -21,13 +21,13 @@ import signal
 from telegram import Telegram
 from database import Database
 
-def LogInit():
+def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    log_file_name = 'logs/%s.log' % os.getpid()
+    log_file_name = 'logs/join.log'
 
-    logging.basicConfig(filename=log_file_name, filemode="w", level=logging.INFO,format = '%(asctime)s - %(message)s') 
+    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - {0} - %(message)s'.format(phone_number)) 
 
     
 def ExistAccount(account : str):
@@ -56,16 +56,15 @@ def AccountHasAuthProblem(account : str):
 
 def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
-    LogInit()
     argv = sys.argv[1:] 
     loop = asyncio.get_event_loop()
     phone_number = ''
     try: 
         opts, args = getopt.getopt(argv, shortopts='a:l:v', longopts = ["account=", "log=", "verbose"]) 
         for opt, arg in opts: 
-            logging.info(opt)
             if opt in ['-a', '--account']: 
                 phone_number = arg
+                LogInit(phone_number)
                 if ExistAccount(phone_number) and (not AccountIsBanned(phone_number) and not AccountHasAuthProblem(phone_number)):
                     logging.info('Start login to %s' % phone_number)
                     login = True
