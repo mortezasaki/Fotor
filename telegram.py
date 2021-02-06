@@ -80,6 +80,7 @@ class Telegram:
 
     async def Search(self, username : str):
         if self.ValidUsername(username):
+            db = Database()
             try :
                 return await self.tg_client.get_entity(username)
             except ValueError: 
@@ -88,9 +89,7 @@ class Telegram:
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
                 logging.info('Disconnect...')
-                db = Database()
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
-                db.Close()
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')
@@ -98,24 +97,30 @@ class Telegram:
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 AddToBan(phone_number)
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
                 exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
                 AddToAuthKeyUnregisteredError(phone_number)
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 exit()
 
             except errors.SessionPasswordNeededError: # TODO: Handle when account has password
                 logging.info('Account has password')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
                 exit()
 
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
                 await self.Connect()                 
+            finally:
+                db.Close()
         return None
 
     async def JoinChannel(self, username : str):
         if await self.Search(username):
+            db = Database()
             try :
                 return await self.tg_client(JoinChannelRequest(username))
             except ValueError: 
@@ -124,9 +129,7 @@ class Telegram:
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
                 logging.info('Disconnect...')
-                db = Database()
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
-                db.Close()
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')
@@ -134,20 +137,25 @@ class Telegram:
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 AddToBan(phone_number)
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
                 exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
                 AddToAuthKeyUnregisteredError(phone_number)
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 exit()
 
             except errors.SessionPasswordNeededError: # TODO: Handle when account has password
                 logging.info('Account has password')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
                 exit()
 
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
-                await self.Connect()                
+                await self.Connect()                 
+            finally:
+                db.Close()
         return None
 
     async def GetChannels(self):
