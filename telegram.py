@@ -9,6 +9,8 @@ import logging
 import socks
 import re
 from time import sleep
+from enums import *
+from database import Database
 
 class Telegram:
     def __init__(self, phone_number):
@@ -86,6 +88,9 @@ class Telegram:
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
                 logging.info('Disconnect...')
+                db = Database()
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+                db.Close()
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')
@@ -119,6 +124,9 @@ class Telegram:
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
                 logging.info('Disconnect...')
+                db = Database()
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+                db.Close()
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')

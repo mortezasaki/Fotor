@@ -95,11 +95,14 @@ def main():
                 channel_id = channel['_id']
                 try:
                     loop.run_until_complete(telegram.Search(channel_username))
-                    loop.run_until_complete(telegram.JoinChannel(channel_username))
-                    db = Database()
-                    db.Join(phone_number, channel_username)
-                    if _api.CallJoin(channel_id):
-                        logging.info('Join was done')
+                    joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
+                    if joined is not None:
+                        db = Database()
+                        db.Join(phone_number, channel_username)
+                        db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
+                        db.Close()
+                        if _api.CallJoin(channel_id):
+                            logging.info('Join was done')
                 except Exception as e:
                     print(type(e).__name__)
                     logging.info(str(e))
