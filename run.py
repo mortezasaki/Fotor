@@ -4,6 +4,8 @@ from time import sleep
 import psutil
 from sms_activate import SMSActivate
 from config import Config
+import re
+from database import Database
 
 banner = '''
                                                                                                        
@@ -44,13 +46,16 @@ class FotorShell(cmd.Cmd):
 
     def do_list(self, arg):
         'List of all running accounts'
-        print(f'{"ProcessId":<10}', f'{"ProcessName":<10}')
+        print(f'{"ProcessId":<20}', f'{"PhoneNumber":<20}', f'{"Joins":<20}')
 
         # Get list of running process https://stackoverflow.com/a/43065994/9850815
         for p in psutil.process_iter():
             cmdline = ' '.join(p.cmdline())
             if 'join.py' in p.name() or 'join.py' in cmdline:
-                print(f'{p.pid:<10}', f'{cmdline:<10}')
+                phone_number = GetPhoneFromCMDLine(cmdline)
+                db = Database()
+                joins = db.CountOfJoins(phone_number)
+                print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}')
 
     def do_log(self, arg):
         'Log a joiner'
@@ -91,7 +96,15 @@ class FotorShell(cmd.Cmd):
                 super(FotorShell, self).cmdloop(intro="")
                 break
             except KeyboardInterrupt:
-                print("^C")        
+                print("^C") 
+
+def GetPhoneFromCMDLine(cmdline):
+    pattern = r'\d{10,}'
+    match = re.search(pattern, cmdline)
+    if match:
+        return match[0]
+    else:
+        return None
 
 
 

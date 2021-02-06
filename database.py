@@ -67,12 +67,20 @@ class Database:
             return True
         return False
 
-    def DeleteAll(self):
-            c = self.conn.cursor()
-            c.execute("delete  from account")
-            c.execute("delete  from joins")
-            self.conn.commit()
+    # def DeleteAll(self):
+    #         c = self.conn.cursor()
+    #         c.execute("delete  from account")
+    #         c.execute("delete  from joins")
+    #         self.conn.commit()
 
-            # We can also close the connection if we are done with it.
-            # Just be sure any changes have been committed or they will be lost.
-            self.conn.close()
+    #         # We can also close the connection if we are done with it.
+    #         # Just be sure any changes have been committed or they will be lost.
+    #         self.conn.close()
+
+    def CountOfJoins(self, phonenumber):
+        if utility.ValidatePhone(phonenumber):
+            t = (phonenumber,)
+            command = "Select * from joins where phonenumber=?"
+            joins = self.conn.execute(command, t)
+            return len(joins.fetchall())
+        return 0
