@@ -35,7 +35,7 @@ def terminate(process):
     process.wait(timeout=0.2)
 
 # https://stackoverflow.com/a/12523371/9850815
-def tail(filename):
+def tail(filename,phone_number):
     f = subprocess.Popen(['tail','-F',filename],\
         stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     
@@ -44,5 +44,7 @@ def tail(filename):
 
     while True:
         if p.poll(1):
-            print (f.stdout.readline().decode("utf-8").strip())
-        sleep(1)
+            log = f.stdout.readline().decode("utf-8").strip()
+            if phone_number in log:
+                print (log)
+        sleep(.1)
