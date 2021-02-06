@@ -7,6 +7,7 @@ from config import Config
 import re
 from database import Database
 from enums import *
+import os, utility
 
 banner = '''
                                                                                                        
@@ -47,17 +48,39 @@ class FotorShell(cmd.Cmd):
 
     def do_list(self, arg):
         'List of all running accounts'
-        print(f'{"ProcessId":<20}', f'{"PhoneNumber":<20}', f'{"Joins":<20}', f'{"Status":<20}')
+        print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}')
+        print('=' * 60)
 
         # Get list of running process https://stackoverflow.com/a/43065994/9850815
-        for p in psutil.process_iter():
-            cmdline = ' '.join(p.cmdline())
-            if 'join.py' in p.name() or 'join.py' in cmdline:
-                phone_number = GetPhoneFromCMDLine(cmdline)
-                db = Database()
-                joins = db.CountOfJoins(phone_number)
-                status = TelegramRegisterStats(db.GetStatus(phone_number)).name
-                print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}', f'{status:<20}')
+        accounts = []
+        db = Database()
+        # for p in psutil.process_iter():
+        #     cmdline = ' '.join(p.cmdline())
+        #     if 'join.py' in p.name() or 'join.py' in cmdline:
+        #         phone_number = GetPhoneFromCMDLine(cmdline)
+        #         accounts.append(phone_number)
+        #         joins = db.CountOfJoins(phone_number)
+        #         status = TelegramRegisterStats(db.GetStatus(phone_number)).name
+        #         print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}', f'{status:<20}')
+
+        for file in os.listdir(Config['account_path']):
+            if file.endswith(".session"):
+                phone_number = file.split('.')[0]
+                if utility.ValidatePhone(phone_number):
+                    status = db.GetStatus(phone_number)
+                    joins = db.CountOfJoins(phone_number)
+                    accounts.append({'Phone' : phone_number, 'Status' : status, 'Joins' : joins })
+        accounts = utility.SortListOfDict(accounts,'Joins')        
+        if accounts is not None:
+            for account in accounts:
+                status = account['Status']
+                if int(status ) not in (TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value):
+                    status = TelegramRegisterStats(status).name
+                    phone_number = account['Phone']
+                    joins = account['Joins']
+                    print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}')      
+
+        db.Close()
 
     def do_log(self, arg):
         'Log a joiner'
