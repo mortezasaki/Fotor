@@ -72,10 +72,13 @@ class FotorShell(cmd.Cmd):
     def do_kill(self, arg):
         'Terminate a process'
         # https://stackoverflow.com/a/17858114/9850815
-        p = psutil.Process(int(arg))
-        cmdline = ' '.join(p.cmdline())
-        if 'join.py' in cmdline:
-            p.terminate()
+        try:
+            p = psutil.Process(int(arg))
+            cmdline = ' '.join(p.cmdline())
+            if 'join.py' in cmdline:
+                p.terminate()
+        except psutil.NoSuchProcess:
+            print('No process found with pid %s. Please use proccess id' % arg)
 
     def do_balance(self, arg):
         'Get sms-activate balance'
