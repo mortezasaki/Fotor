@@ -9,13 +9,13 @@ from enums import *
 class TestDatabase(unittest.TestCase):
     def test_getstatus(self):
         db = Database()
-        status = db.GetStatus('6283171147795')
+        status = db.GetStatus('6283872812198')
         db.Close()
-        self.assertEqual(status[0], 5)
+        self.assertEqual(status, 5)
 
     def test_updatestatus(self):
         db = Database()
-        res = db.UpdateStatus('6283171147795', TelegramRegisterStats.Running.value)
+        res = db.UpdateStatus('6283872812198', TelegramRegisterStats.Succesfull.value)
         db.Close()
         self.assertTrue(res)
 
