@@ -4,6 +4,7 @@ import random
 import string
 from bs4 import BeautifulSoup
 from time import sleep
+from operator import itemgetter
 
 def ValidatePhone(phone):
     """Check that phone number is OK
@@ -21,6 +22,11 @@ def ValidatePhone(phone):
 def SortDic(data):
     if data is not None:
         return dict(sorted(data.items(), key=lambda item: item[1]))
+    return None
+
+def SortListOfDict(data, value):
+    if data is not None:
+        return sorted(data, key=itemgetter(value)) 
     return None
 
 def FakeNameGenerator(gender = 'random', country = 'random'):
