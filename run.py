@@ -6,6 +6,7 @@ from sms_activate import SMSActivate
 from config import Config
 import re
 from database import Database
+from enums import *
 
 banner = '''
                                                                                                        
@@ -55,7 +56,7 @@ class FotorShell(cmd.Cmd):
                 phone_number = GetPhoneFromCMDLine(cmdline)
                 db = Database()
                 joins = db.CountOfJoins(phone_number)
-                status = db.GetStatus(phone_number)
+                status = TelegramRegisterStats(db.GetStatus(phone_number)).name
                 print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}', f'{status:<20}')
 
     def do_log(self, arg):
