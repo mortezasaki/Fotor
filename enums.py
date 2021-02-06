@@ -15,6 +15,7 @@ class TelegramRegisterStats(enum.Enum):
     HasPassword = 4
     Running = 5
     Stop = 6
+    AuthProblem = 7
 
 class SMSActivateSMSStatus(enum.Enum):
     Report = 1
