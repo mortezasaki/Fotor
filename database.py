@@ -2,6 +2,7 @@ import sqlite3
 import os
 import utility
 import datetime
+import logging
 
 class Database:
     def __init__(self):
@@ -94,9 +95,15 @@ class Database:
     def GetStatus(self, phonenumber):
         command = "Select status from account where phonenumber=?"
         t = (phonenumber,)
-        status = self.conn.execute(command, t)
-        count = status.fetchone()[0]
-        return count
+        try:
+            status = self.conn.execute(command, t)
+            count = status.fetchone()[0]
+            return count
+        except TypeError:
+            return 1
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return 1
 
     def Close(self):
         return self.conn.close()
