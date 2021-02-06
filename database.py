@@ -84,3 +84,19 @@ class Database:
             joins = self.conn.execute(command, t)
             return len(joins.fetchall())
         return 0
+
+    def UpdateStatus(self, phonenumber, status : int):
+        command = "Update account set status = ? where phonenumber = ?"
+        t = (status, phonenumber,)
+        self.conn.execute(command, t)
+        self.conn.commit()
+        return True
+
+    def GetStatus(self, phonenumber):
+        command = "Select status from account where phonenumber=?"
+        t = (phonenumber,)
+        status = self.conn.execute(command, t)
+        return status.fetchone()[0]
+
+    def Close(self):
+        self.conn.close()

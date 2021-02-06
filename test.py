@@ -3,6 +3,22 @@ import utility
 # from join import SMSActivate
 import asyncio
 import warnings
+from database import Database
+from enums import *
+
+class TestDatabase(unittest.TestCase):
+    def test_getstatus(self):
+        db = Database()
+        status = db.GetStatus('6283171147795')
+        db.Close()
+        self.assertEqual(status[0], 5)
+
+    def test_updatestatus(self):
+        db = Database()
+        res = db.UpdateStatus('6283171147795', TelegramRegisterStats.Running.value)
+        db.Close()
+        self.assertTrue(res)
+
 class TestUtility(unittest.TestCase):
     def test_ValidatePhone(self):
         self.assertTrue(utility.ValidatePhone('989161234578'))
