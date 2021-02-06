@@ -39,16 +39,19 @@ class Database:
     
     def NewAccount(self, phonenumber, country, firstname, family, gender):
         if utility.ValidatePhone(phonenumber):
-            c = self.conn.cursor()
-            command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
-            c.execute(command)
-            
-            # Save (commit) the changes
-            self.conn.commit()
+            try:
+                c = self.conn.cursor()
+                command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
+                c.execute(command)
+                
+                # Save (commit) the changes
+                self.conn.commit()
 
-            # We can also close the connection if we are done with it.
-            # Just be sure any changes have been committed or they will be lost.
-            return True
+                # We can also close the connection if we are done with it.
+                # Just be sure any changes have been committed or they will be lost.
+                return True
+            except sqlite3.IntegrityError:
+                return False
         return False
 
     def Join(self, phonenumber, channel):
