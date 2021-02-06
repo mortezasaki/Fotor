@@ -24,9 +24,14 @@ def SortDic(data):
         return dict(sorted(data.items(), key=lambda item: item[1]))
     return None
 
-def SortListOfDict(data, value):
-    if data is not None:
-        return sorted(data, key=itemgetter(value)) 
+def SortListOfDict(data, value,reverse = True):
+    try:
+        if data is not None:
+            return sorted(data, key=itemgetter(value), reverse = reverse) 
+    except TypeError:
+        return None
+    except KeyError:
+        return None
     return None
 
 def FakeNameGenerator(gender = 'random', country = 'random'):
