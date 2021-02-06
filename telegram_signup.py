@@ -80,9 +80,9 @@ def LogInit():
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    log_file_name = 'logs/%s.log' % os.getpid()
+    log_file_name = 'logs/register.log'
 
-    logging.basicConfig(filename=log_file_name, filemode="w", level=logging.INFO,format = '%(asctime)s - %(message)s') 
+    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - %(message)s') 
 
 
 def handler(signum, frame):
