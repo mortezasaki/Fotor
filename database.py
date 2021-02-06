@@ -35,7 +35,6 @@ class Database:
 
         # We can also close the connection if we are done with it.
         # Just be sure any changes have been committed or they will be lost.
-        self.conn.close()
     
     def NewAccount(self, phonenumber, country, firstname, family, gender):
         if utility.ValidatePhone(phonenumber):
@@ -48,7 +47,6 @@ class Database:
 
             # We can also close the connection if we are done with it.
             # Just be sure any changes have been committed or they will be lost.
-            self.conn.close()
             return True
         return False
 
@@ -64,7 +62,6 @@ class Database:
 
             # We can also close the connection if we are done with it.
             # Just be sure any changes have been committed or they will be lost.
-            self.conn.close()
             return True
         return False
 
@@ -84,7 +81,6 @@ class Database:
             command = "Select * from joins where phonenumber=?"
             joins = self.conn.execute(command, t)
             res = len(joins.fetchall())
-            self.conn.close()
             return res
         return 0
 
@@ -93,7 +89,6 @@ class Database:
         t = (status, phonenumber,)
         self.conn.execute(command, t)
         self.conn.commit()
-        self.conn.close()
         return True
 
     def GetStatus(self, phonenumber):
@@ -101,5 +96,7 @@ class Database:
         t = (phonenumber,)
         status = self.conn.execute(command, t)
         count = status.fetchone()[0]
-        self.conn.close()
         return count
+
+    def Close(self):
+        return self.conn.close()
