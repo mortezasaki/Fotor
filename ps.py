@@ -4,6 +4,7 @@
 import subprocess
 import select
 from time import sleep
+import logging
 
 def start(executable_file):
     return subprocess.Popen(
@@ -43,8 +44,13 @@ def tail(filename,phone_number):
     p.register(f.stdout)
 
     while True:
-        if p.poll(1):
-            log = f.stdout.readline().decode("utf-8").strip()
-            if phone_number in log:
-                print (log)
-        sleep(.1)
+        try:
+            if p.poll(1):
+                log = f.stdout.readline().decode("utf-8").strip()
+                if phone_number in log:
+                    print (log)
+            sleep(.1)
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            logging.info(type(e).__name__)
