@@ -89,7 +89,7 @@ class Telegram:
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')
-                await self.Login()
+                await self.Connect()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 AddToBan(phone_number)
@@ -106,7 +106,7 @@ class Telegram:
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
-                await self.Login()                 
+                await self.Connect()                 
         return None
 
     async def JoinChannel(self, username : str):
@@ -122,7 +122,7 @@ class Telegram:
                 await self.tg_client.disconnect()
                 sleep(e.seconds)
                 logging.info('Connect and login...')
-                await self.Login()
+                await self.Connect()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 AddToBan(phone_number)
@@ -139,7 +139,7 @@ class Telegram:
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
-                await self.Login()                
+                await self.Connect()                
         return None
 
     async def GetChannels(self):
