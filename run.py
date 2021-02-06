@@ -85,6 +85,17 @@ class FotorShell(cmd.Cmd):
         sms = SMSActivate(Config['SMS_Activate_API'])
         print('sms-activate.ru balance is: %s' % sms.Balance())
 
+    def do_register(self, args):
+        'Register new number to account database'
+        account_info = args.split()
+        if len(account_info) == 6:
+            phonenumber, country, firstname, family, gender, status = account_info
+            db = Database()
+            db.NewAccount(phonenumber, country, firstname, family, int(gender))
+            db.UpdateStatus(phonenumber, int(status))
+            db.Close()
+        else:
+            print("Use this value => phonenumber country firstname family gender status")
 
     def do_exit(self, arg):
         'Exit from shell'
