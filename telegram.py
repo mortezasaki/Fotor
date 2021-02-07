@@ -179,6 +179,10 @@ class Telegram:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
             exit()
+        except errors.AuthKeyUnregisteredError:
+            logging.info('AuthKeyUnregisteredError')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            exit()
         except Exception as e:
             logging.info(type(e).__name__)
             return None
@@ -191,8 +195,4 @@ class Telegram:
         async for dialog in self.tg_client.iter_dialogs():
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
-<<<<<<< HEAD
         return channels
-=======
-        return channels
->>>>>>> b10519189cebca9470abfbddc6b6e49bd89b767a
