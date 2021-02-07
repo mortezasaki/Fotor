@@ -179,9 +179,16 @@ class Telegram:
             logging.info('User has been deactivate')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
             exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            exit()
         except Exception as e:
             logging.info(type(e).__name__)
             return None
+        finally:
+            db.Close()
+            
 
     async def GetChannels(self):
         channels=[]
