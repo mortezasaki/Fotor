@@ -79,7 +79,18 @@ class FotorShell(cmd.Cmd):
                 status = account['Status']
 
                 if int(status ) not in showed:
+                    # Fix https://app.gitkraken.com/glo/view/card/c83bdb72da984df28d6a84b9994ac6cd
+                    if int(status) in (TelegramRegisterStats.Running.value, TelegramRegisterStats.FloodWait.value):
+                        process = GetListOfAllProccess()
+                        running = False
+                        for p in process:
+                            if p['Phone'] == account['Phone']:
+                                running = True
+                                break
+                        if not running:
+                            status = TelegramRegisterStats.Stop.value
                     status = TelegramRegisterStats(status).name
+                        
                     phone_number = account['Phone']
                     joins = account['Joins']
                     print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}')      
