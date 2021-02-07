@@ -27,32 +27,7 @@ def LogInit(phone_number):
         os.mkdir('logs')
     log_file_name = 'logs/join.log'
 
-    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - {0} - %(message)s'.format(phone_number)) 
-
-    
-def ExistAccount(account : str):
-    account_location = "%s%s.session" % (Config['account_path'],account)
-    if os.path.exists(account_location):
-        return True
-    return False
-
-def AccountIsBanned(account : str):
-    if os.path.exists('ban.txt'):
-        with open('ban.txt','r') as f:
-            accounts = f.readlines()
-            for _account in accounts:
-                if account == _account.replace('\n',''):
-                    return True
-    return False
-
-def AccountHasAuthProblem(account : str):
-    if os.path.exists('autherror.txt'):
-        with open('autherror.txt','r') as f:
-            accounts = f.readlines()
-            for _account in accounts:
-                if account == _account.replace('\n',''):
-                    return True
-        return False    
+    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - {0} - %(message)s'.format(phone_number))  
 
 def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
@@ -65,16 +40,9 @@ def main():
             if opt in ['-a', '--account']: 
                 phone_number = arg
                 LogInit(phone_number)
-                if ExistAccount(phone_number) and (not AccountIsBanned(phone_number) and not AccountHasAuthProblem(phone_number)):
-                    logging.info('Start login to %s' % phone_number)
-                    login = True
-                    break
-                else :
-                    logging.info('Account has problem or maybe it banned or not exist')
-                    exit(1)
-    except SystemExit:
-        logging.info('Account has problem or maybe it banned or not exist')
-        exit()
+                logging.info('Start login to %s' % phone_number)
+                login = True
+                break
     
     except Exception as e:
         logging.info(str(e))
@@ -85,7 +53,7 @@ def main():
     telegram = Telegram(phone_number)
     if loop.run_until_complete(telegram.Connect()):
         _api = API(phone_number)
-        # _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
+        _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
         
         while True:
             channel = _api.CallGetChannel()
