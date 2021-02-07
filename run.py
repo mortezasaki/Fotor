@@ -35,7 +35,6 @@ FFFFFFFFFFF                OOOOOOOOO           TTTTTTTTTTT           OOOOOOOOO  
 
 
 
-process_list = []
 class FotorShell(cmd.Cmd):
     intro = 'Welcome to the Fotor shell.'
     prompt = 'Fotor: '
@@ -43,8 +42,7 @@ class FotorShell(cmd.Cmd):
     def do_new(self, arg):
         'Create new telegram account'
         new_fotor = ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
-        process_list.append(new_fotor)
-        self.do_log(len(process_list)-1)
+        self.do_log(None, register_log = True)
 
     def do_list(self, arg):
         'List of all running accounts'
@@ -88,9 +86,12 @@ class FotorShell(cmd.Cmd):
 
         db.Close()
 
-    def do_log(self, arg):
+    def do_log(self, arg, register_log = False):
         'Log a joiner'
-        ps.tail('logs/join.log',arg)
+        if register_log:
+            ps.tail('logs/register.log')
+        else:
+            ps.tail('logs/join.log',arg)
 
     def do_login(self, arg):
         'Login to the exist account'
@@ -103,7 +104,6 @@ class FotorShell(cmd.Cmd):
                 break
         if running:
             fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
-            process_list.append(fotor)
             self.do_log(arg)
 
     def do_kill(self, arg):

@@ -36,7 +36,7 @@ def terminate(process):
     process.wait(timeout=0.2)
 
 # https://stackoverflow.com/a/12523371/9850815
-def tail(filename,phone_number):
+def tail(filename,searched = None):
     f = subprocess.Popen(['tail','-F',filename],\
         stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     
@@ -47,8 +47,12 @@ def tail(filename,phone_number):
         try:
             if p.poll(1):
                 log = f.stdout.readline().decode("utf-8").strip()
-                if phone_number in log:
-                    print (log)
+                if searched is not None:
+                    if searched in log:
+                        print (log)
+                else:
+                    print(log)
+                
             sleep(.1)
         except KeyboardInterrupt:
             break
