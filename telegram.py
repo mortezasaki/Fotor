@@ -96,12 +96,10 @@ class Telegram:
                 await self.Connect()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
-                AddToBan(phone_number)
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
                 exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
-                AddToAuthKeyUnregisteredError(phone_number)
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 exit()
 
@@ -136,12 +134,10 @@ class Telegram:
                 await self.Connect()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
-                AddToBan(phone_number)
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
                 exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
-                AddToAuthKeyUnregisteredError(phone_number)
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 exit()
 
@@ -196,12 +192,3 @@ class Telegram:
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
         return channels
-
-
-def AddToBan(account : str):
-    with open('ban.txt','a') as f:
-        f.write('%s\n' % account)
-
-def AddToAuthKeyUnregisteredError(account : str):
-    with open('autherror.txt','a') as f:
-        f.write('%s\n' % account)
