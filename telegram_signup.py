@@ -78,7 +78,8 @@ def main():
             _api = API(phone_number)
             _api.CallRegisterAPI(name, family ,Gender.Man.value,sms_activate.GetCountryName(country_code),status =TelegramRegisterStats.Succesfull.value)
             db = Database()
-            db.NewAccount(phone_number, sms_activate.GetCountryName(country_code), name, family,TelegramRegisterStats.Succesfull.value)
+            db.NewAccount(phone_number, sms_activate.GetCountryName(country_code), name, family,Gender.Man.value)
+            db.UpdateStatus(phone_number, TelegramRegisterStats.Succesfull.value)
             db.Close()
             logging.info('Complate %s sing up' % phone_number)
 
