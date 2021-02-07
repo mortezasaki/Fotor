@@ -2,7 +2,7 @@ import os
 from config import Config
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
-from telethon import errors
+from telethon import errors, functions
 import asyncio
 import utility
 import logging
@@ -119,7 +119,7 @@ class Telegram:
         return None
 
     async def JoinChannel(self, username : str):
-        if await self.Search(username):
+        if await self.Resolve(username):
             db = Database()
             try :
                 return await self.tg_client(JoinChannelRequest(username))
@@ -158,12 +158,36 @@ class Telegram:
                 db.Close()               
         return None
 
+    async def Resolve(self, username : str):
+        db = Database()
+        try:
+            return await self.tg_client(functions.contacts.ResolveUsernameRequest(username))
+        except errors.AuthKeyPermEmptyError:
+            logging.info('The method is unavailable for temporary authorization key, not bound to permanent.')
+            return None
+        except errors.SessionPasswordNeededError:
+            logging.info('Two-steps verification is enabled and a password is required.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            exit()
+        except errors.UsernameInvalidError:
+            logging.info('Nobody is using this username, or the username is unacceptable. If the latter, it must match r"[a-zA-Z][\w\d]{3,30}[a-zA-Z\d]".')
+            return None
+        except errors.UsernameNotOccupiedError:
+            logging.info('The username is not in use by anyone else yet.')
+            return None
+        except errors.UserDeactivatedError:
+            logging.info('User has been deactivate')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            exit()
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return None
+
     async def GetChannels(self):
         channels=[]
         async for dialog in self.tg_client.iter_dialogs():
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
-        print(channels)
         return channels
 
 
