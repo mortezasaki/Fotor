@@ -94,7 +94,6 @@ def main():
                 logging.info('Joining to %s channel' % channel_username)
                 channel_id = channel['_id']
                 try:
-                    loop.run_until_complete(telegram.Search(channel_username))
                     joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
                     if joined is not None:
                         db = Database()
