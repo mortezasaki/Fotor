@@ -95,13 +95,23 @@ class FotorShell(cmd.Cmd):
     def do_kill(self, arg):
         'Terminate a process'
         # https://stackoverflow.com/a/17858114/9850815
-        try:
-            p = psutil.Process(int(arg))
-            cmdline = ' '.join(p.cmdline())
-            if 'join.py' in cmdline:
-                p.terminate()
-        except psutil.NoSuchProcess:
-            print('No process found with pid %s. Please use proccess id' % arg)
+        proccess = GetListOfAllProccess()
+        found = False
+        for p in proccess:
+            if p['Phone'] == arg:
+                found = True
+                try :
+                    p = psutil.Process(p['PID'])
+                    p.terminate()
+                    db = Database()
+                    db.UpdateStatus(arg, TelegramRegisterStats.Stop.value)
+                    print('Account with phone number %s was stoped' % arg)
+                except psutil.NoSuchProcess:
+                    print('No process found with pid %s. Please use proccess id. please try again' % p['PID'])
+                break
+        if not found:
+            print('No account found with number %s' % arg)
+                
 
     def do_balance(self, arg):
         'Get sms-activate balance'
@@ -144,6 +154,18 @@ def GetPhoneFromCMDLine(cmdline):
         return match[0]
     else:
         return None
+
+def GetListOfAllProccess():
+    accounts = []
+    for p in psutil.process_iter():
+        cmdline = ' '.join(p.cmdline())
+        pattern = r'\d{10,}'
+        if 'join.py' in cmdline and re.search(pattern, cmdline):
+            phone_number = GetPhoneFromCMDLine(cmdline)
+            process = {'PID' : p.pid, 'Phone' : phone_number}
+            accounts.append(process)
+    
+    return accounts
 
 
 
