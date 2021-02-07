@@ -56,8 +56,9 @@ def main():
                         sms_activate.CancelCode(status)
 
         else:
+            sleep(1)
             logging.info('Your money on sms-activate.ru is low. please recharge it')
-            break
+            exit()
 
         # after get activation code sign up to telegram
     if activation_code is not None:
