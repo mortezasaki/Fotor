@@ -196,12 +196,3 @@ class Telegram:
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
         return channels
-
-
-def AddToBan(account : str):
-    with open('ban.txt','a') as f:
-        f.write('%s\n' % account)
-
-def AddToAuthKeyUnregisteredError(account : str):
-    with open('autherror.txt','a') as f:
-        f.write('%s\n' % account)
