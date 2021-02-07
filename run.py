@@ -51,17 +51,22 @@ class FotorShell(cmd.Cmd):
         print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}')
         print('=' * 60)
 
-        # Get list of running process https://stackoverflow.com/a/43065994/9850815
+
+        showed = [] # a list that uses for which account type was showed
+        if arg == 'ban':
+            showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
+                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value]
+        elif arg =='problem':
+            showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.FloodWait.value,
+                        TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value]
+        elif arg == 'running':
+            showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
+                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value]
+        else:
+            showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value]
+
         accounts = []
         db = Database()
-        # for p in psutil.process_iter():
-        #     cmdline = ' '.join(p.cmdline())
-        #     if 'join.py' in p.name() or 'join.py' in cmdline:
-        #         phone_number = GetPhoneFromCMDLine(cmdline)
-        #         accounts.append(phone_number)
-        #         joins = db.CountOfJoins(phone_number)
-        #         status = TelegramRegisterStats(db.GetStatus(phone_number)).name
-        #         print(f'{p.pid:<20}', f'{phone_number:<20}', f'{joins:<20}', f'{status:<20}')
 
         for file in os.listdir(Config['account_path']):
             if file.endswith(".session"):
@@ -74,7 +79,8 @@ class FotorShell(cmd.Cmd):
         if accounts is not None:
             for account in accounts:
                 status = account['Status']
-                if int(status ) not in (TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value):
+
+                if int(status ) not in showed:
                     status = TelegramRegisterStats(status).name
                     phone_number = account['Phone']
                     joins = account['Joins']
@@ -155,6 +161,7 @@ def GetPhoneFromCMDLine(cmdline):
     else:
         return None
 
+# Get list of running process https://stackoverflow.com/a/43065994/9850815
 def GetListOfAllProccess():
     accounts = []
     for p in psutil.process_iter():
