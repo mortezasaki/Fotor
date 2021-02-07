@@ -191,4 +191,8 @@ class Telegram:
         async for dialog in self.tg_client.iter_dialogs():
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
+<<<<<<< HEAD
         return channels
+=======
+        return channels
+>>>>>>> b10519189cebca9470abfbddc6b6e49bd89b767a
