@@ -63,7 +63,7 @@ class FotorShell(cmd.Cmd):
             showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
                         TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value]
         else:
-            showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value]
+            showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value]
 
         accounts = []
         db = Database()
@@ -94,9 +94,17 @@ class FotorShell(cmd.Cmd):
 
     def do_login(self, arg):
         'Login to the exist account'
-        fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
-        process_list.append(fotor)
-        self.do_log(arg)
+        proccess = GetListOfAllProccess()
+        running = True
+        for p in proccess:
+            if arg == p['Phone']:
+                print('%s is running.' % arg)
+                running = False
+                break
+        if running:
+            fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
+            process_list.append(fotor)
+            self.do_log(arg)
 
     def do_kill(self, arg):
         'Terminate a process'
@@ -119,6 +127,7 @@ class FotorShell(cmd.Cmd):
             print('No account found with number %s' % arg)
                 
     def do_delete(self, phonenumber):
+        self.do_kill(phonenumber)
         db = Database()
         if utility.ValidatePhone(phonenumber) and db.DeleteAccount(phonenumber):
             file_path = '{0}{1}.session'.format(Config['account_path'], phonenumber)
