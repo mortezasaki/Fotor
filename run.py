@@ -156,6 +156,9 @@ class FotorShell(cmd.Cmd):
         else:
             print("Use this value => phonenumber country firstname family gender status")
 
+    def do_banner(self,arg):
+        print(banner)
+
     def do_exit(self, arg):
         'Exit from shell'
         exit()
@@ -171,7 +174,7 @@ class FotorShell(cmd.Cmd):
                 super(FotorShell, self).cmdloop(intro="")
                 break
             except KeyboardInterrupt:
-                print("^C") 
+                print("^C")
 
 def GetPhoneFromCMDLine(cmdline):
     pattern = r'\d{10,}'
