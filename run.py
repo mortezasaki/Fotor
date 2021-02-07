@@ -118,6 +118,17 @@ class FotorShell(cmd.Cmd):
         if not found:
             print('No account found with number %s' % arg)
                 
+    def do_delete(self, phonenumber):
+        db = Database()
+        if utility.ValidatePhone(phonenumber) and db.DeleteAccount(phonenumber):
+            file_path = '{0}{1}.session'.format(Config['account_path'], phonenumber)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            print('%s account has been deleted.' % phonenumber)
+        else:
+            print('Value error')
+        db.Close()
+
 
     def do_balance(self, arg):
         'Get sms-activate balance'

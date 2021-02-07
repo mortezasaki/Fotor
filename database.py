@@ -108,5 +108,16 @@ class Database:
             logging.info(type(e).__name__)
             return 1
 
+    def DeleteAccount(self, phonenumber):
+        command = 'Delete from account where phonenumber = ?'
+        t = (phonenumber,)
+        try:
+            deleted = self.conn.execute(command, t).rowcount
+            self.conn.commit()
+            return deleted
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return False
+
     def Close(self):
         return self.conn.close()
