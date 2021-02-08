@@ -49,6 +49,10 @@ def main():
         logging.info(type(e).__name__)
         exit()
 
+    if not ExistAccount(phone_number):
+        sleep(1)
+        logging.info('%s not exist in accounts directory' % phone_number)        
+        exit()
 
     telegram = Telegram(phone_number)
     if loop.run_until_complete(telegram.Connect()):
@@ -74,7 +78,12 @@ def main():
                     print(type(e).__name__)
                     logging.info(str(e))
 
-
+def ExistAccount(phonenumber):
+    for file in os.listdir(Config['account_path']):
+        name = file.split('.')
+        if len(name) == 2 and name[0] == phonenumber and name[1] == "session":
+            return True
+    return False
 
 def handler(signum, frame):
     print("ctrl+c")
