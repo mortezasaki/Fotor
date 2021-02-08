@@ -16,6 +16,7 @@ class TelegramRegisterStats(enum.Enum):
     Running = 5
     Stop = 6
     AuthProblem = 7
+    ToMany = 8
 
 class SMSActivateSMSStatus(enum.Enum):
     Report = 1

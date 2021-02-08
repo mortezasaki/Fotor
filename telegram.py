@@ -102,12 +102,17 @@ class Telegram:
                 logging.info('Account has auth problem')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 exit()
-
             except errors.SessionPasswordNeededError: # TODO: Handle when account has password
                 logging.info('Account has password')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
                 exit()
-
+            except errors.ChannelsTooMuchError:
+                logging.info('You have joined too many channels/supergroups.')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+                exit()
+            except errors.ChannelPrivateError:
+                logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+                return None
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
@@ -145,7 +150,13 @@ class Telegram:
                 logging.info('Account has password')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
                 exit()
-
+            except errors.ChannelsTooMuchError:
+                logging.info('You have joined too many channels/supergroups.')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+                exit()
+            except errors.ChannelPrivateError:
+                logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+                return None
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
@@ -183,6 +194,13 @@ class Telegram:
             logging.info('AuthKeyUnregisteredError')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
             exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None            
         except Exception as e:
             logging.info(type(e).__name__)
             return None
