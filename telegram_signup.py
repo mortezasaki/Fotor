@@ -10,6 +10,8 @@ from api import API
 from enums import *
 from time import sleep
 from database import Database
+from pytz import timezone, utc
+from datetime import datetime
 
 
 def main():
@@ -51,7 +53,6 @@ def main():
                         if activation_code is not None:
                             logging.info('Activation code is: %s' % activation_code)
                             break
-                        sms_activate.CancelCode(status)
                     except:
                         sms_activate.CancelCode(status)
 
@@ -59,6 +60,9 @@ def main():
             sleep(1)
             logging.info('Your money on sms-activate.ru is low. please recharge it')
             exit()
+        
+        # Fix issue # 5
+        DeleteSession(phone_number)
 
         # after get activation code sign up to telegram
     if activation_code is not None:
@@ -83,6 +87,11 @@ def main():
             db.Close()
             logging.info('Complate %s sing up' % phone_number)
 
+def DeleteSession(phonenumber):
+    file = '{0}{1}.session'.format(Config['account_path'], phonenumber)
+    if os.path.exists(file):
+        os.remove(file)
+
 def LogInit():
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
     if not os.path.exists('logs'):
@@ -90,6 +99,15 @@ def LogInit():
     log_file_name = 'logs/register.log'
 
     logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - %(message)s') 
+
+    logging.Formatter.converter = customTime
+
+# Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
+def customTime(*args):
+    utc_dt = utc.localize(datetime.utcnow())
+    my_tz = timezone("Asia/Tehran")
+    converted = utc_dt.astimezone(my_tz)
+    return converted.timetuple()
 
 
 def handler(signum, frame):
