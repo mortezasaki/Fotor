@@ -66,34 +66,37 @@ class FotorShell(cmd.Cmd):
         accounts = []
         db = Database()
 
-        for file in os.listdir(Config['account_path']):
-            if file.endswith(".session"):
-                phone_number = file.split('.')[0]
-                if utility.ValidatePhone(phone_number):
-                    status = db.GetStatus(phone_number)
-                    joins = db.CountOfJoins(phone_number)
-                    accounts.append({'Phone' : phone_number, 'Status' : status, 'Joins' : joins })
-        accounts = utility.SortListOfDict(accounts,'Joins')        
-        if accounts is not None:
-            for account in accounts:
-                status = account['Status']
+        try:
+            for file in os.listdir(Config['account_path']):
+                if file.endswith(".session"):
+                    phone_number = file.split('.')[0]
+                    if utility.ValidatePhone(phone_number):
+                        status = db.GetStatus(phone_number)
+                        joins = db.CountOfJoins(phone_number)
+                        accounts.append({'Phone' : phone_number, 'Status' : status, 'Joins' : joins })
+            accounts = utility.SortListOfDict(accounts,'Joins')        
+            if accounts is not None:
+                for account in accounts:
+                    status = account['Status']
 
-                if int(status ) not in showed:
-                    # Fix https://app.gitkraken.com/glo/view/card/c83bdb72da984df28d6a84b9994ac6cd
-                    if int(status) in (TelegramRegisterStats.Running.value, TelegramRegisterStats.FloodWait.value):
-                        process = GetListOfAllProccess()
-                        running = False
-                        for p in process:
-                            if p['Phone'] == account['Phone']:
-                                running = True
-                                break
-                        if not running:
-                            status = TelegramRegisterStats.Stop.value
-                    status = TelegramRegisterStats(status).name
-                        
-                    phone_number = account['Phone']
-                    joins = account['Joins']
-                    print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}')      
+                    if int(status ) not in showed:
+                        # Fix https://app.gitkraken.com/glo/view/card/c83bdb72da984df28d6a84b9994ac6cd
+                        if int(status) in (TelegramRegisterStats.Running.value, TelegramRegisterStats.FloodWait.value):
+                            process = GetListOfAllProccess()
+                            running = False
+                            for p in process:
+                                if p['Phone'] == account['Phone']:
+                                    running = True
+                                    break
+                            if not running:
+                                status = TelegramRegisterStats.Stop.value
+                        status = TelegramRegisterStats(status).name
+                            
+                        phone_number = account['Phone']
+                        joins = account['Joins']
+                        print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}') 
+        except FileNotFoundError:
+            print('No such file or directory')
 
         db.Close()
 
@@ -204,9 +207,16 @@ Joins = {7}
         'Exit from shell'
         exit()
 
+    def do_createdb(self, arg):
+        'Initial create database.'
+        db = Database()
+        db.Create()
+        db.Close()
+
     # Handle when press enter do nothing https://stackoverflow.com/a/21066546/9850815
     def emptyline(self):
          pass
+        
 
     def cmdloop(self, intro=None):
         print(self.intro)
