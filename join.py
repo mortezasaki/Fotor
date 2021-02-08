@@ -20,6 +20,8 @@ import getopt
 import signal
 from telegram import Telegram
 from database import Database
+from pytz import timezone, utc
+from datetime import datetime
 
 def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
@@ -27,7 +29,17 @@ def LogInit(phone_number):
         os.mkdir('logs')
     log_file_name = 'logs/join.log'
 
-    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - {0} - %(message)s'.format(phone_number))  
+    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,
+        format = '%(asctime)s - {0} - %(message)s'.format(phone_number), datefmt="%Y-%m-%d %H:%M:%S") 
+    
+    logging.Formatter.converter = customTime
+
+# Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
+def customTime(*args):
+    utc_dt = utc.localize(datetime.utcnow())
+    my_tz = timezone("Asia/Tehran")
+    converted = utc_dt.astimezone(my_tz)
+    return converted.timetuple()
 
 def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
