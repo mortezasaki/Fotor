@@ -6,7 +6,10 @@ import logging
 
 class Database:
     def __init__(self):
-        self.conn = sqlite3.connect('data.db')
+        if os.path.exists('data.db'):
+            self.conn = sqlite3.connect('data.db')
+        else:
+            print(r"Can't find data.db file please run `createdb` command")
 
     def Create(self):
         c = self.conn.cursor()
