@@ -252,4 +252,6 @@ def GetListOfAllProccess():
 
 if __name__ == '__main__':
     print(banner)
+    if not os.path.exists('logs/'):
+        os.mkdir('logs')
     FotorShell().cmdloop()
