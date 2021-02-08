@@ -97,6 +97,36 @@ class FotorShell(cmd.Cmd):
 
         db.Close()
 
+    # Display system statistics. Issue #3
+    def do_statistics(self, arg):
+        statistics = '''
+Fotor Statistics
+=====================
+Accounts = {0}
+Running = {1}
+FloodWait = {2}
+Stop = {3}
+Ban = {4}
+Has Password = {5}
+Has Problem = {6}
+----------------------
+Joins = {7}
+'''
+
+        db = Database()
+
+        accounts = db.Count('Select * from account', ())
+        running = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Running.value,))
+        flood = db.Count('Select * from account where status = ?',(TelegramRegisterStats.FloodWait.value,))
+        stop = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Stop.value,))
+        ban = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Ban.value,))
+        hasPassword = db.Count('Select * from account where status = ?',(TelegramRegisterStats.HasPassword.value,))
+        problem = db.Count('Select * from account where status = ?',(TelegramRegisterStats.AuthProblem.value,))
+        joins = db.Count('Select * from joins', ())
+
+        statistics = statistics.format(accounts, running, flood, stop, ban, hasPassword, problem, joins)
+        print(statistics)
+
     def do_log(self, arg, register_log = False):
         'Log a joiner'
         if register_log:

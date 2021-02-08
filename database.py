@@ -119,5 +119,13 @@ class Database:
             logging.info(type(e).__name__)
             return False
 
+    def Count(self, command, t):
+        try:
+            res = self.conn.execute(command, t)
+            return len(res.fetchall())
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return False
+
     def Close(self):
         return self.conn.close()
