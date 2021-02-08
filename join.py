@@ -49,6 +49,7 @@ def main():
         logging.info(type(e).__name__)
         exit()
 
+    # Fix #2
     if not ExistAccount(phone_number):
         sleep(1)
         logging.info('%s not exist in accounts directory' % phone_number)        
@@ -79,6 +80,8 @@ def main():
                     logging.info(str(e))
 
 def ExistAccount(phonenumber):
+    if not os.path.exists(Config['account_path']):
+        return False
     for file in os.listdir(Config['account_path']):
         name = file.split('.')
         if len(name) == 2 and name[0] == phonenumber and name[1] == "session":
