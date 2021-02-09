@@ -15,7 +15,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_updatestatus(self):
         db = Database()
-        res = db.UpdateStatus('6283872812198', TelegramRegisterStats.Succesfull.value)
+        res = db.UpdateStatus('6283857340337', TelegramRegisterStats.Succesfull.value)
         db.Close()
         self.assertTrue(res)
 
