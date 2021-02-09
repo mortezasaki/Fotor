@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+
+  fotor:
+    build: src
+    restart: always
+    volumes:
+      - ./app/src:/fotor
