@@ -43,6 +43,8 @@ class Telegram:
 
     async def Connect(self, use_proxy = False):
         tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
+        if not os.path.exists(tg_session_location):
+            exit()
 
         if use_proxy:
             proxies = utility.GetProxy()
@@ -70,12 +72,24 @@ class Telegram:
                         continue
         
         else:
-            self.tg_client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-                device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
+            try:
+                self.tg_client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
+                    device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
+            except TypeError:
+                os.remove(tg_session_location)                
+                exit()
+            except SystemExit():
+                exit()
         
-        await self.tg_client.connect()
-        if self.tg_client.is_connected() :
-            return True
+        try:
+            await self.tg_client.connect()
+            if self.tg_client.is_connected() :
+                return True
+        except errors.TimeoutError:
+            logging.info('Fail to connect.')
+            return False
+        except Exception as e:
+            logging.info(type(e).__name__)
         return False
 
     async def Search(self, username : str):
@@ -88,12 +102,11 @@ class Telegram:
                 return None
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
-                logging.info('Disconnect...')
+                logging.info('Exit...')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+                db.UpdateFlooWait(self.phone_number, e.seconds)
                 await self.tg_client.disconnect()
-                sleep(e.seconds)
-                logging.info('Connect and login...')
-                await self.Connect()
+                exit()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
@@ -116,7 +129,8 @@ class Telegram:
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
-                await self.Connect()  
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+                exit()
             finally:
                 db.Close()                                
         return None
@@ -131,12 +145,11 @@ class Telegram:
                 return None
             except errors.FloodWaitError as e:
                 logging.info('Flood wait for %s' % e.seconds)
-                logging.info('Disconnect...')
+                logging.info('Exit...')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+                db.UpdateFlooWait(self.phone_number, e.seconds)
                 await self.tg_client.disconnect()
-                sleep(e.seconds)
-                logging.info('Connect and login...')
-                await self.Connect()
+                exit()
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
@@ -144,6 +157,7 @@ class Telegram:
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+                os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
                 exit()
 
             except errors.SessionPasswordNeededError: # TODO: Handle when account has password
@@ -160,7 +174,8 @@ class Telegram:
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
-                await self.Connect()  
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+                exit()
             finally:
                 db.Close()               
         return None

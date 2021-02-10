@@ -3,13 +3,11 @@ import os
 import utility
 import datetime
 import logging
+from enums import *
 
 class Database:
     def __init__(self):
-        if os.path.exists('data.db'):
-            self.conn = sqlite3.connect('data.db')
-        else:
-            print(r"Can't find data.db file please run `createdb` command")
+        self.conn = sqlite3.connect('data.db', timeout=30.0)
 
     def Create(self):
         c = self.conn.cursor()
@@ -22,7 +20,9 @@ class Database:
                     family text,
                     gender INTEGER,
                     date_creation text,
-                    status integer)
+                    status integer,
+                    flood_wait_time text,
+                    flood_wait_seconds integer)
                     ''')
         
         c.execute('''CREATE TABLE joins
@@ -44,7 +44,7 @@ class Database:
         if utility.ValidatePhone(phonenumber):
             try:
                 c = self.conn.cursor()
-                command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
+                command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0,'None',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
                 c.execute(command)
                 
                 # Save (commit) the changes
@@ -98,6 +98,13 @@ class Database:
         self.conn.commit()
         return True
 
+    def UpdateFlooWait(self, phonenumber, second : int):
+        command = "Update account set flood_wait_time = ?, flood_wait_seconds = ? where phonenumber = ?"
+        t = (datetime.datetime.now(), second, phonenumber,)
+        self.conn.execute(command, t)
+        self.conn.commit()
+        return True    
+
     def GetStatus(self, phonenumber):
         command = "Select status from account where phonenumber=?"
         t = (phonenumber,)
@@ -110,6 +117,18 @@ class Database:
         except Exception as e:
             logging.info(type(e).__name__)
             return 1
+
+    def GetFloodWait(self, phonenumber):
+        command = "Select flood_wait_time, flood_wait_seconds from account where phonenumber=? and status = ?"
+        t = (phonenumber, TelegramRegisterStats.FloodWait.value)
+        try:
+            status = self.conn.execute(command, t)
+            return status.fetchone()
+        except TypeError:
+            return 0
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return 0
 
     def DeleteAccount(self, phonenumber):
         command = 'Delete from account where phonenumber = ?'

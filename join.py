@@ -90,7 +90,7 @@ def main():
                 except Exception as e:
                     print(type(e).__name__)
                     logging.info(str(e))
-
+                    
 def ExistAccount(phonenumber):
     if not os.path.exists(Config['account_path']):
         return False

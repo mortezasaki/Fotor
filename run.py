@@ -53,13 +53,14 @@ class FotorShell(cmd.Cmd):
         showed = [] # a list that uses for which account type was showed
         if arg == 'ban':
             showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
-                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value]
+                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value,
+                        TelegramRegisterStats.ToMany.value]
         elif arg =='problem':
             showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.FloodWait.value,
-                        TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value]
+                        TelegramRegisterStats.Running.value, TelegramRegisterStats.Stop.value, TelegramRegisterStats.ToMany.value]
         elif arg == 'running':
             showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
-                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value]
+                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value, TelegramRegisterStats.ToMany.value]
         else:
             showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value]
 
@@ -81,6 +82,7 @@ class FotorShell(cmd.Cmd):
 
                     if int(status ) not in showed:
                         # Fix https://app.gitkraken.com/glo/view/card/c83bdb72da984df28d6a84b9994ac6cd
+                        # Fix when account not runnig but in database has running. Change status to stop
                         if int(status) in (TelegramRegisterStats.Running.value, TelegramRegisterStats.FloodWait.value):
                             process = GetListOfAllProccess()
                             running = False
@@ -150,6 +152,26 @@ Joins = {7}
             fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
             self.do_log(arg)
 
+    def do_auto(self, arg):
+        'Automate Create account and join to channel with limitation'
+        if arg == 'Stop':
+                for p in psutil.process_iter():
+                    if 'auto.py' in p.cmdline():
+                        p.terminate()
+                        print('Automation stoped')
+                        break
+        elif arg is None:
+            started = False
+            for p in psutil.process_iter():
+                if 'auto.py' in p.cmdline():
+                    started = True
+                    print('Automation has been started')
+                    break
+
+            if not started:
+                ps.start(['python', 'auto.py'])
+                print('Start automation with account limitation %s' % Config['limit_account'])
+
     def do_kill(self, arg):
         'Terminate a process'
         # https://stackoverflow.com/a/17858114/9850815
@@ -209,9 +231,12 @@ Joins = {7}
 
     def do_createdb(self, arg):
         'Initial create database.'
-        db = Database()
-        db.Create()
-        db.Close()
+        if not os.path.exists('data.db'):
+            db = Database()
+            db.Create()
+            db.Close()
+        else:
+            print('Database exist')
 
     # Handle when press enter do nothing https://stackoverflow.com/a/21066546/9850815
     def emptyline(self):
