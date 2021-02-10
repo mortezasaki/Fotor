@@ -8,6 +8,7 @@ import re
 from database import Database
 from enums import *
 import os, utility
+import datetime
 
 banner = '''
                                                                                                        
@@ -46,8 +47,8 @@ class FotorShell(cmd.Cmd):
 
     def do_list(self, arg):
         'List of all running accounts'
-        print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}')
-        print('=' * 60)
+        print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
+        print('=' * 80)
 
 
         showed = [] # a list that uses for which account type was showed
@@ -79,11 +80,10 @@ class FotorShell(cmd.Cmd):
             if accounts is not None:
                 for account in accounts:
                     status = account['Status']
-
                     if int(status ) not in showed:
                         # Fix https://app.gitkraken.com/glo/view/card/c83bdb72da984df28d6a84b9994ac6cd
                         # Fix when account not runnig but in database has running. Change status to stop
-                        if int(status) in (TelegramRegisterStats.Running.value, TelegramRegisterStats.FloodWait.value):
+                        if int(status) == TelegramRegisterStats.Running.value:
                             process = GetListOfAllProccess()
                             running = False
                             for p in process:
@@ -92,11 +92,24 @@ class FotorShell(cmd.Cmd):
                                     break
                             if not running:
                                 status = TelegramRegisterStats.Stop.value
+
+                        # نمایش فلود ویت در لیست اگر در دیتابیس برای اکانت ثبت شده باشد
+                        floodWait = str(datetime.timedelta(seconds=0))
+                        if int(status) == TelegramRegisterStats.FloodWait.value:
+                            flood = db.GetFloodWait(account['Phone'])
+                            if len(flood) == 2:
+                                _time = datetime.datetime.strptime(flood[0], '%Y-%m-%d %H:%M:%S.%f')
+                                seconds_passed = (datetime.datetime.now() - _time ).total_seconds()
+                                if seconds_passed < flood[1]:
+                                    floodWait =str(datetime.timedelta(seconds=flood[1]))
+                                else:
+                                    status = TelegramRegisterStats.Stop.value
+
                         status = TelegramRegisterStats(status).name
                             
                         phone_number = account['Phone']
                         joins = account['Joins']
-                        print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}') 
+                        print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}', f'{floodWait:<20}') 
         except FileNotFoundError:
             print('No such file or directory')
 
