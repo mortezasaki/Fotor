@@ -154,13 +154,13 @@ Joins = {7}
 
     def do_auto(self, arg):
         'Automate Create account and join to channel with limitation'
-        if arg == 'Stop':
+        if arg == 'stop':
                 for p in psutil.process_iter():
                     if 'auto.py' in p.cmdline():
                         p.terminate()
                         print('Automation stoped')
                         break
-        elif arg is None:
+        elif arg == '':
             started = False
             for p in psutil.process_iter():
                 if 'auto.py' in p.cmdline():
