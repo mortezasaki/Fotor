@@ -45,7 +45,7 @@ def main():
                 logging.info('Status: {0}, Phone Number: {1}'.format(status, phone_number))
                 logging.info('Start Telethon...')
                 telegram = Telegram(phone_number)
-                if loop.run_until_complete(telegram.Connect()) and loop.run_until_complete(telegram.SendCode()):
+                if loop.run_until_complete(telegram.Connect(login = False)) and loop.run_until_complete(telegram.SendCode()):
                     logging.info('The activation code telegram was sent')
                     logging.info('Wait for activation code...')
                     try:

@@ -41,9 +41,9 @@ class Telegram:
         except:
             return False
 
-    async def Connect(self, use_proxy = False):
+    async def Connect(self, use_proxy = False, login = True):
         tg_session_location = '{0}{1}.session'.format(Config['account_path'],self.phone_number)
-        if not os.path.exists(tg_session_location):
+        if login and not os.path.exists(tg_session_location):
             exit()
 
         if use_proxy:
@@ -184,6 +184,13 @@ class Telegram:
         db = Database()
         try:
             return await self.tg_client(functions.contacts.ResolveUsernameRequest(username))
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s' % e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            exit()        
         except errors.AuthKeyPermEmptyError:
             logging.info('The method is unavailable for temporary authorization key, not bound to permanent.')
             return None
