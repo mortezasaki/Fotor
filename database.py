@@ -55,6 +55,9 @@ class Database:
                 return True
             except sqlite3.IntegrityError:
                 return False
+            except Exception as e:
+                logging.info(type(e).__name__)
+                return False
         return False
 
     def Join(self, phonenumber, channel):

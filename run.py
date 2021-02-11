@@ -73,6 +73,7 @@ class FotorShell(cmd.Cmd):
                 if file.endswith(".session"):
                     phone_number = file.split('.')[0]
                     if utility.ValidatePhone(phone_number):
+                        db.NewAccount(phone_number, 'Test', 'Test', 'Test', 0)
                         status = db.GetStatus(phone_number)
                         joins = db.CountOfJoins(phone_number)
                         accounts.append({'Phone' : phone_number, 'Status' : status, 'Joins' : joins })
