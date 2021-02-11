@@ -19,28 +19,34 @@ def GetPhoneFromCMDLine(cmdline):
 
 def GetJoinProcess():
     process = []
-    for p in psutil.process_iter():
-        try:
-            cmdline = ' '.join(p.cmdline())
-            pattern = r'\d{10,}'
-            if 'join.py' in cmdline and re.search(pattern, cmdline):
-                phone_number = GetPhoneFromCMDLine(cmdline)
-                process.append(phone_number)
-        except psutil.NoSuchProcess:
-            continue
+    try:
+        for p in psutil.process_iter():
+            try:
+                cmdline = ' '.join(p.cmdline())
+                pattern = r'\d{10,}'
+                if 'join.py' in cmdline and re.search(pattern, cmdline):
+                    phone_number = GetPhoneFromCMDLine(cmdline)
+                    process.append(phone_number)
+            except psutil.NoSuchProcess:
+                continue
+    except KeyboardInterrupt: # Fix issue 11
+        pass        
     
     return process
 
 def GetSignUpProcess():
     process = []
-    for p in psutil.process_iter():
-        try:
-            cmdline = ' '.join(p.cmdline())
-            pattern = r'\d{10,}'
-            if 'telegram_signup.py' in cmdline:
-                process.append(p)
-        except psutil.NoSuchProcess:
-            continue
+    try:
+        for p in psutil.process_iter():
+            try:
+                cmdline = ' '.join(p.cmdline())
+                pattern = r'\d{10,}'
+                if 'telegram_signup.py' in cmdline:
+                    process.append(p)
+            except psutil.NoSuchProcess:
+                continue
+    except KeyboardInterrupt: # Fix issue 11
+        pass
     
     return process    
 
