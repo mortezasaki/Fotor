@@ -122,6 +122,7 @@ class FotorShell(cmd.Cmd):
 Fotor Statistics
 =====================
 Accounts = {0}
+---------------------
 Running = {1}
 FloodWait = {2}
 Stop = {3}
@@ -137,11 +138,14 @@ Joins = {7}
         accounts = db.Count('Select * from account', ())
         running = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Running.value,))
         flood = db.Count('Select * from account where status = ?',(TelegramRegisterStats.FloodWait.value,))
-        stop = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Stop.value,))
         ban = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Ban.value,))
         hasPassword = db.Count('Select * from account where status = ?',(TelegramRegisterStats.HasPassword.value,))
         problem = db.Count('Select * from account where status = ?',(TelegramRegisterStats.AuthProblem.value,))
+
+        stop = accounts - (running+flood+ban+hasPassword+problem) # fix issue #9
+
         joins = db.Count('Select * from joins', ())
+
 
         statistics = statistics.format(accounts, running, flood, stop, ban, hasPassword, problem, joins)
         print(statistics)
