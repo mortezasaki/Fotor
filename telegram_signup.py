@@ -86,6 +86,10 @@ def main():
             db.UpdateStatus(phone_number, TelegramRegisterStats.Succesfull.value)
             db.Close()
             logging.info('Complate %s sing up' % phone_number)
+        else:
+            logging.info('Problem in sign up for %s' % phone_number)
+            sms_activate.CancelCode(status)
+            DeleteSession(phone_number)
 
 def DeleteSession(phonenumber):
     file = '{0}{1}.session'.format(Config['account_path'], phonenumber)
