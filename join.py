@@ -22,6 +22,7 @@ from telegram import Telegram
 from database import Database
 from pytz import timezone, utc
 from datetime import datetime
+import sqlite3
 
 def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
@@ -87,6 +88,10 @@ def main():
                         db.Close()
                         if _api.CallJoin(channel_id):
                             logging.info('Join was done')
+                
+                except sqlite3.OperationalError: # for issue 12
+                    logging.info('Maybe problem in Telegram...')
+                    continue
                 except Exception as e:
                     print(type(e).__name__)
                     logging.info(str(e))
