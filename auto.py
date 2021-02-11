@@ -95,9 +95,6 @@ def main():
                         count_of_signup_process = len(GetSignUpProcess())
                         if (len(stoped_accounts) + count_of_signup_process) < limit_account:
                             ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
-                        else:
-                            while len(GetSignUpProcess()) == count_of_signup_process:
-                                sleep(1)
                 else :
                     ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
             except FileNotFoundError:
