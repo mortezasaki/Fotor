@@ -102,7 +102,9 @@ class FotorShell(cmd.Cmd):
                                 _time = datetime.datetime.strptime(flood[0], '%Y-%m-%d %H:%M:%S.%f')
                                 seconds_passed = (datetime.datetime.now() - _time ).total_seconds()
                                 if seconds_passed < flood[1]:
-                                    floodWait =str(datetime.timedelta(seconds=flood[1]))
+                                    # Fix Issue 10
+                                    seconds_passed = flood[1] - seconds_passed
+                                    floodWait ='{:02}:{:02}:{:02}'.format(int(seconds_passed // 3600), int(seconds_passed % 3600 // 60), int(seconds_passed % 60))
                                 else:
                                     status = TelegramRegisterStats.Stop.value
 
