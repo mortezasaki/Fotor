@@ -56,5 +56,7 @@ def tail(filename,searched = None):
             sleep(.1)
         except KeyboardInterrupt:
             break
+        except BrokenPipeError: # Solution for issue 13 
+            continue
         except Exception as e:
             logging.info(type(e).__name__)
