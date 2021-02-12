@@ -136,13 +136,21 @@ Joins = {7}
 '''
 
         db = Database()
-
         accounts = db.Count('Select * from account', ())
         running = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Running.value,))
         flood = db.Count('Select * from account where status = ?',(TelegramRegisterStats.FloodWait.value,))
         ban = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Ban.value,))
         hasPassword = db.Count('Select * from account where status = ?',(TelegramRegisterStats.HasPassword.value,))
         problem = db.Count('Select * from account where status = ?',(TelegramRegisterStats.AuthProblem.value,))
+
+        # Solution for issue 14
+        for acc in db.GetAccounts():
+            status = acc[6]
+            if status == TelegramRegisterStats.FloodWait.value:
+                _time = datetime.datetime.strptime(acc[7], '%Y-%m-%d %H:%M:%S.%f')
+                seconds_passed = (datetime.datetime.now() - _time ).total_seconds()
+                if seconds_passed > acc[8]:
+                    flood-=1
 
         stop = accounts - (running+flood+ban+hasPassword+problem) # fix issue #9
 
