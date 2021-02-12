@@ -47,16 +47,17 @@ def tail(filename,searched = None):
         try:
             if p.poll(1):
                 log = f.stdout.readline().decode("utf-8").strip()
-                if searched is not None:
-                    if searched in log:
-                        print (log)
-                else:
-                    print(log)
+                if 'BrokenPipeError' not in log: # solution for issue 13
+                    if searched is not None:
+                        if searched in log:
+                            print (log)
+                    else:
+                        print(log)
                 
             sleep(.1)
         except KeyboardInterrupt:
             break
         except BrokenPipeError: # Solution for issue 13 
-            continue
+            pass
         except Exception as e:
             logging.info(type(e).__name__)
