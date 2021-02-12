@@ -126,11 +126,13 @@ class Telegram:
             except errors.ChannelPrivateError:
                 logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
                 return None
+            except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+                pass                  
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
-                exit()
+                exit()              
             finally:
                 db.Close()                                
         return None
@@ -171,8 +173,10 @@ class Telegram:
             except errors.ChannelPrivateError:
                 logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
                 return None
+            except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+                pass                
             except Exception as e:
-                print(type(e).__name__)
+                logging.info(type(e).__name__)
                 logging.info(str(e))
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
                 exit()
@@ -222,7 +226,9 @@ class Telegram:
             exit()
         except errors.ChannelPrivateError:
             logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
-            return None            
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass                      
         except Exception as e:
             logging.info(type(e).__name__)
             return None
