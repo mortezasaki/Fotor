@@ -152,5 +152,13 @@ class Database:
             logging.info(type(e).__name__)
             return False
 
+    def GetAccounts(self):
+        try:
+            command = 'Select * from account'
+            return self.conn.execute(command).fetchall()
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return None
+
     def Close(self):
         return self.conn.close()
