@@ -17,6 +17,7 @@ lib/
 lib64/
 share/
 downloads/
+src/
 eggs/
 tmp/
 .eggs/
@@ -135,3 +136,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 data.db-journal
+
+Accounts_old/
+
+data.db
+
+autherror.txt
+
+ban.txt
