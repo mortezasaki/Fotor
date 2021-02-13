@@ -72,13 +72,11 @@ def main():
         _api = API(phone_number)
         _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
         
-        while True:
-            req = requests.get('https://t.me')
-            if req.status_code != 200: # Fix bug 15
-                logging.info("Can't connect to internet") 
-                exit()
+        try_to_connect_membersgram = 10
+        while try_to_connect_membersgram > 0: # fix Issue 15
             channel = _api.CallGetChannel()
             if channel is not None:
+                try_to_connect_membersgram = 10
                 channel_username = channel['username']
                 logging.info('Joining to %s channel' % channel_username)
                 channel_id = channel['_id']
@@ -92,9 +90,19 @@ def main():
                         if _api.CallJoin(channel_id):
                             logging.info('Join was done')
 
+                except ConnectionError:
+                    logging.info('Connection error')                          
+                    exit()
+                except SystemExit:
+                    logging.info('Exit...')
+                    exit()
                 except Exception as e:
                     print(type(e).__name__)
-                    logging.info(str(e))
+                    logging.info(str(e) + ' JoinClass')
+            else:
+                try_to_connect_membersgram-=1
+        logging.info("Can't connect to membersgram server and exit")
+
                     
 def ExistAccount(phonenumber):
     if not os.path.exists(Config['account_path']):

@@ -40,9 +40,10 @@ class API:
             if req.status_code == 200:
                 return req.json()['data']
         except ConnectionError:
+            logging.info("Can't connect to Membersgram Server")
             return None
         except Exception as e:
-            logging.info(type(e).__name__)
+            logging.info(type(e).__name__ + ' CallGetChannel')
         return None
 
     def CallJoin(self, _id : str):
@@ -56,9 +57,10 @@ class API:
                 if res == 200:
                     return True
         except ConnectionError:
-            return False
+            logging.info("Can't connect to Membersgram Server")
+            return None
         except Exception as e:
-            logging.info(type(e).__name__)                          
+            logging.info(type(e).__name__ + ' CallJoin')                          
             return False
         return False
 
