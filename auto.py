@@ -70,7 +70,8 @@ def main():
                 if accounts is not None:
                     for account in accounts:
                         status = account['Status']
-                        showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value]
+                        showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value,
+                                    TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.ToMany.value]
 
                         if int(status ) not in showed and account['Phone'] not in process:
                             if int(status) == TelegramRegisterStats.FloodWait.value:
