@@ -12,12 +12,16 @@ from time import sleep
 from database import Database
 from pytz import timezone, utc
 from datetime import datetime
+import requests
 
 
 def main():
     signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     LogInit()
     logging.info("Register new number...")
+    if req.status_code != 200: # Fix bug 15
+        logging.info("Can't connect to internet") 
+        exit()
 
     _api = ''
     telegram = ''

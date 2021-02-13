@@ -8,7 +8,7 @@
 با دریافت این شماره تلفن به دنبال یک سشن تلگرام میگردد و بعد از پیدا کردن آن وارد تلگرام میشود و شروع به جوین شدن میکند
 """
  
-import sys
+import sys, requests
 from config import Config
 import os
 import asyncio
@@ -73,6 +73,10 @@ def main():
         _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
         
         while True:
+            req = requests.get('https://t.me')
+            if req.status_code != 200: # Fix bug 15
+                logging.info("Can't connect to internet") 
+                exit()
             channel = _api.CallGetChannel()
             if channel is not None:
                 channel_username = channel['username']
