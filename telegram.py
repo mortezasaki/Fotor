@@ -128,6 +128,12 @@ class Telegram:
                 return None
             except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
                 pass                  
+            except errors.ChannelBannedError:
+                logging.info('The channel is banned')
+                return None
+            except errors.ChannelInvalidError:
+                logging.info('The channel has invalid error')
+                return None                
             except Exception as e:
                 print(type(e).__name__)
                 logging.info(str(e))
@@ -174,7 +180,13 @@ class Telegram:
                 logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
                 return None
             except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
-                pass                
+                pass
+            except errors.ChannelBannedError:
+                logging.info('The channel is banned')
+                return None
+            except errors.ChannelInvalidError:
+                logging.info('The channel has invalid error')
+                return None                          
             except Exception as e:
                 logging.info(type(e).__name__)
                 logging.info(str(e))
@@ -229,6 +241,12 @@ class Telegram:
             return None
         except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
             pass                      
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None          
         except Exception as e:
             logging.info(type(e).__name__)
             return None
