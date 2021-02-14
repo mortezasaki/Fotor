@@ -97,14 +97,20 @@ def main():
             try:
                 for file in os.listdir(Config['account_path']):
                     # fix load account for join when sign up not complated
-                    file_creation = os.path.getctime('%s%s' %(Config['account_path'], file))
-                    file_creation = datetime.datetime.fromtimestamp(file_creation)
-                    diff = (datetime.datetime.now() - file_creation).total_seconds() / 60.0 
-                    if file.endswith(".session") and diff > 2:
-                        phone_number = file.split('.')[0]
-                        if utility.ValidatePhone(phone_number):
-                            status = db.GetStatus(phone_number)
-                            accounts.append({'Phone' : phone_number, 'Status' : status})
+                    try:
+                        file_creation = os.path.getctime('%s%s' %(Config['account_path'], file))
+                        file_creation = datetime.datetime.fromtimestamp(file_creation)
+                        diff = (datetime.datetime.now() - file_creation).total_seconds() / 60.0 
+                        if file.endswith(".session") and diff > 2:
+                            phone_number = file.split('.')[0]
+                            if utility.ValidatePhone(phone_number):
+                                status = db.GetStatus(phone_number)
+                                accounts.append({'Phone' : phone_number, 'Status' : status})
+                    except FileNotFoundError:
+                        logging.info('No such file or directory')
+                        continue
+                    except AttributeError: # Fix issue 20
+                        continue
                 
                 stoped_accounts = []
                 
@@ -146,9 +152,10 @@ def main():
                 else :
                     if CheckLimitation():
                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
-            except FileNotFoundError:
-                logging.info('No such file or directory')
+
             except KeyboardInterrupt: # fix issue 19
+                continue
+            except AttributeError: # Fix issue 20
                 continue
             except Exception as e:
                 logging.info(str(e))
