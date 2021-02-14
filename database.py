@@ -117,6 +117,10 @@ class Database:
             return count
         except TypeError:
             return 1
+        except KeyboardInterrupt: # fix issue 19
+            status = self.conn.execute(command, t)
+            count = status.fetchone()[0]
+            return count            
         except Exception as e:
             logging.info(type(e).__name__)
             return 1
