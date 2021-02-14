@@ -37,7 +37,7 @@ def terminate(process):
     process.wait(timeout=0.2)
 
 # https://stackoverflow.com/a/12523371/9850815
-def tail(filename,searched = None):
+def tail(filename,searched = None, match = True):
     f = subprocess.Popen(['tail','-F',filename],\
         stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     
@@ -49,12 +49,15 @@ def tail(filename,searched = None):
             if p.poll(1):
                 log = f.stdout.readline().decode("utf-8").strip()
                 pattern = r'^\d{4}-\d{2}-\d{2}( )\d{2}(:)\d{2}(:)\d{2}( - )\d{8,}( - )\w+' # EX 2021-02-14 11:37:46 - 6283840238778 - Disconnecting
-                if re.match(pattern, log): # solution for issue 13 only print logs
+                if match and re.match(pattern, log): # solution for issue 13 only print logs
                     if searched is not None:
                         if searched in log:
                             print (log)
                     else:
                         print(log)
+                elif not match:
+                    print(log)
+
                 
             sleep(.1)
         except KeyboardInterrupt:

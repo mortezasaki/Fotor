@@ -170,7 +170,7 @@ Joins = {7}
     def do_log(self, arg, register_log = False):
         'Log a joiner'
         if register_log or arg == 'register':
-            ps.tail('logs/register.log')
+            ps.tail('logs/register.log', match=False)
         else:
             ps.tail('logs/join.log',arg)
 
