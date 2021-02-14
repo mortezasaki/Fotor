@@ -98,7 +98,10 @@ def main():
                 for file in os.listdir(Config['account_path']):
                     # fix load account for join when sign up not complated
                     try:
-                        file_creation = os.path.getctime('%s%s' %(Config['account_path'], file))
+                        file_name = '%s%s' %(Config['account_path'], file)
+                        if not os.path.exists(file_name):
+                            continue
+                        file_creation = os.path.getctime(file_name)
                         file_creation = datetime.datetime.fromtimestamp(file_creation)
                         diff = (datetime.datetime.now() - file_creation).total_seconds() / 60.0 
                         if file.endswith(".session") and diff > 2:
