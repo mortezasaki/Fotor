@@ -58,6 +58,7 @@ def tail(filename,searched = None):
                 
             sleep(.1)
         except KeyboardInterrupt:
+            f.kill()
             break
         except BrokenPipeError: # Solution for issue 13 
             pass
