@@ -62,6 +62,10 @@ class FotorShell(cmd.Cmd):
         elif arg == 'running':
             showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
                         TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value, TelegramRegisterStats.ToMany.value]
+        elif arg == 'many': # To fix Issue 18
+            showed = [TelegramRegisterStats.Succesfull.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.FloodWait.value,
+                        TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value,
+                        TelegramRegisterStats.Running.value]                    
         else:
             showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value]
 
@@ -162,7 +166,7 @@ Joins = {7}
 
     def do_log(self, arg, register_log = False):
         'Log a joiner'
-        if register_log:
+        if register_log or arg == 'register':
             ps.tail('logs/register.log')
         else:
             ps.tail('logs/join.log',arg)
