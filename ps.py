@@ -5,6 +5,7 @@ import subprocess
 import select
 from time import sleep
 import logging
+import re
 
 def start(executable_file):
     return subprocess.Popen(
@@ -47,7 +48,8 @@ def tail(filename,searched = None):
         try:
             if p.poll(1):
                 log = f.stdout.readline().decode("utf-8").strip()
-                if 'BrokenPipeError' not in log: # solution for issue 13
+                pattern = r'^\d{4}-\d{2}-\d{2}( )\d{2}(:)\d{2}(:)\d{2}( - )\d{8,}( - )\w+' # EX 2021-02-14 11:37:46 - 6283840238778 - Disconnecting
+                if re.match(pattern, log): # solution for issue 13 only print logs
                     if searched is not None:
                         if searched in log:
                             print (log)
