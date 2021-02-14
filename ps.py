@@ -63,3 +63,4 @@ def tail(filename,searched = None):
             pass
         except Exception as e:
             logging.info(type(e).__name__)
+    f.kill()
