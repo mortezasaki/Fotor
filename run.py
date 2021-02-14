@@ -133,6 +133,7 @@ Accounts = {0}
 Running = {1}
 FloodWait = {2}
 Stop = {3}
+ToMany = {8}
 Ban = {4}
 Has Password = {5}
 Has Problem = {6}
@@ -147,6 +148,7 @@ Joins = {7}
         ban = db.Count('Select * from account where status = ?',(TelegramRegisterStats.Ban.value,))
         hasPassword = db.Count('Select * from account where status = ?',(TelegramRegisterStats.HasPassword.value,))
         problem = db.Count('Select * from account where status = ?',(TelegramRegisterStats.AuthProblem.value,))
+        toMany = db.Count('Select * from account where status = ?',(TelegramRegisterStats.ToMany.value,))
 
         # Solution for issue 14
         for acc in db.GetAccounts():
@@ -157,12 +159,12 @@ Joins = {7}
                 if seconds_passed > acc[8]:
                     flood-=1
 
-        stop = accounts - (running+flood+ban+hasPassword+problem) # fix issue #9
+        stop = accounts - (running+flood+ban+hasPassword+problem+toMany) # fix issue #9
 
         joins = db.Count('Select * from joins', ())
 
 
-        statistics = statistics.format(accounts, running, flood, stop, ban, hasPassword, problem, joins)
+        statistics = statistics.format(accounts, running, flood, stop, ban, hasPassword, problem, joins, toMany)
         print(statistics)
 
     def do_log(self, arg, register_log = False):
