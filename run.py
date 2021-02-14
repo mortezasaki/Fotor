@@ -67,7 +67,8 @@ class FotorShell(cmd.Cmd):
                         TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.Ban.value, TelegramRegisterStats.Stop.value,
                         TelegramRegisterStats.Running.value]                    
         else:
-            showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value]
+            showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value, TelegramRegisterStats.HasPassword.value,
+                        TelegramRegisterStats.ToMany.value]
 
         accounts = []
         db = Database()
