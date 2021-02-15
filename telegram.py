@@ -11,6 +11,7 @@ import re
 from time import sleep
 from enums import *
 from database import Database
+import sqlite3
 
 class Telegram:
     def __init__(self, phone_number):
@@ -89,7 +90,7 @@ class Telegram:
             logging.info('Fail to connect.')
             return False
         except Exception as e:
-            logging.info(type(e).__name__)
+            logging.info(type(e).__name__ + ' Connect')
         return False
 
     async def Search(self, username : str):
@@ -133,10 +134,12 @@ class Telegram:
                 return None
             except errors.ChannelInvalidError:
                 logging.info('The channel has invalid error')
-                return None                
+                return None  
+            except sqlite3.OperationalError:
+                logging.info('sqlite OperationalError on Resolve')
+                return None                              
             except Exception as e:
-                print(type(e).__name__)
-                logging.info(str(e))
+                logging.info(type(e).__name__ + ' Search Channel')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
                 exit()              
             finally:
@@ -186,10 +189,12 @@ class Telegram:
                 return None
             except errors.ChannelInvalidError:
                 logging.info('The channel has invalid error')
-                return None                          
+                return None
+            except sqlite3.OperationalError:
+                logging.info('sqlite OperationalError on Resolve')
+                return None                
             except Exception as e:
-                logging.info(type(e).__name__)
-                logging.info(str(e))
+                logging.info(type(e).__name__ + ' JoinChannel')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
                 exit()
             finally:
@@ -246,9 +251,12 @@ class Telegram:
             return None
         except errors.ChannelInvalidError:
             logging.info('The channel has invalid error')
-            return None          
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
         except Exception as e:
-            logging.info(type(e).__name__)
+            logging.info(type(e).__name__ + ' Resolve')
             return None
         finally:
             db.Close()
