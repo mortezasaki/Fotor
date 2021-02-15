@@ -88,6 +88,8 @@ def GetSignUpProcess():
     return process    
 
 def main():
+    if not os.path.exists(Config['account_path']):
+        os.mkdir(Config['account_path'])
     limit_account = Config['limit_account']
     while True:
         process = GetJoinProcess()
