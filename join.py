@@ -97,10 +97,9 @@ def main():
                     logging.info('Exit...')
                     exit()
                 except Exception as e:
-                    print(type(e).__name__)
-                    logging.info(str(e) + ' JoinClass')
+                    logging.info(type(e).__name__ + ' JoinClass')
             else:
-                try_to_connect_membersgram-=1
+                try_to_connect_membersgram = try_to_connect_membersgram - 1
         logging.info("Can't connect to membersgram server and exit")
 
                     
