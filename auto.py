@@ -166,6 +166,7 @@ def main():
                 logging.info(str(e))
 
             db.Close()
+        sleep(10)
 
 def handler(signum, frame):
     print("ctrl+c")
