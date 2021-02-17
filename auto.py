@@ -60,6 +60,10 @@ def CheckLimitation():
     db = Database()
     limit = Config['account_per_day']
     accounts = db.GetAccounts()
+    if not accounts: # Fix issue 21
+        logging.info('Cant connect to database be sure that data.db exist or execude `createdb` command')
+        sleep(1)
+        exit()
     count_of_account_created_today = 0
 
     for account in accounts:
@@ -166,7 +170,7 @@ def main():
                 logging.info(str(e))
 
             db.Close()
-        sleep(10)
+        sleep(30)
 
 def handler(signum, frame):
     print("ctrl+c")

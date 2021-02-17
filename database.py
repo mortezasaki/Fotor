@@ -4,10 +4,18 @@ import utility
 import datetime
 import logging
 from enums import *
+from time import sleep
 
 class Database:
     def __init__(self):
-        self.conn = sqlite3.connect('data.db', timeout=30.0)
+        try:
+            self.conn = sqlite3.connect('data.db', timeout=30.0)
+        except sqlite3.OperationalError:
+            exit()
+        except SystemExit:
+            logging.info('Error in loading database...')
+            sleep(1)
+            exit()
 
     def Create(self):
         c = self.conn.cursor()
@@ -55,6 +63,8 @@ class Database:
                 return True
             except sqlite3.IntegrityError:
                 return False
+            except sqlite3.OperationalError:
+                return False
             except Exception as e:
                 logging.info(type(e).__name__)
                 return False
@@ -62,17 +72,20 @@ class Database:
 
     def Join(self, phonenumber, channel):
         if utility.ValidatePhone(phonenumber):
-            c = self.conn.cursor()
-            t = (phonenumber, channel, datetime.datetime.now(),)
-            command = "INSERT INTO joins (phonenumber, channel, date_join) VALUES (?,?,?)"
-            c.execute(command, t)
-            
-            # Save (commit) the changes
-            self.conn.commit()
+            try:
+                c = self.conn.cursor()
+                t = (phonenumber, channel, datetime.datetime.now(),)
+                command = "INSERT INTO joins (phonenumber, channel, date_join) VALUES (?,?,?)"
+                c.execute(command, t)
+                
+                # Save (commit) the changes
+                self.conn.commit()
 
-            # We can also close the connection if we are done with it.
-            # Just be sure any changes have been committed or they will be lost.
-            return True
+                # We can also close the connection if we are done with it.
+                # Just be sure any changes have been committed or they will be lost.
+                return True
+            except sqlite3.OperationalError:
+                return False
         return False
 
     # def DeleteAll(self):
@@ -87,26 +100,35 @@ class Database:
 
     def CountOfJoins(self, phonenumber):
         if utility.ValidatePhone(phonenumber):
-            t = (phonenumber,)
-            command = "Select * from joins where phonenumber=?"
-            joins = self.conn.execute(command, t)
-            res = len(joins.fetchall())
-            return res
+            try:
+                t = (phonenumber,)
+                command = "Select * from joins where phonenumber=?"
+                joins = self.conn.execute(command, t)
+                res = len(joins.fetchall())
+                return res
+            except sqlite3.OperationalError:
+                return 0
         return 0
 
     def UpdateStatus(self, phonenumber, status : int):
-        command = "Update account set status = ? where phonenumber = ?"
-        t = (status, phonenumber,)
-        self.conn.execute(command, t)
-        self.conn.commit()
-        return True
+        try:
+            command = "Update account set status = ? where phonenumber = ?"
+            t = (status, phonenumber,)
+            self.conn.execute(command, t)
+            self.conn.commit()
+            return True
+        except sqlite3.OperationalError:
+            return False
 
     def UpdateFlooWait(self, phonenumber, second : int):
-        command = "Update account set flood_wait_time = ?, flood_wait_seconds = ? where phonenumber = ?"
-        t = (datetime.datetime.now(), second, phonenumber,)
-        self.conn.execute(command, t)
-        self.conn.commit()
-        return True    
+        try:
+            command = "Update account set flood_wait_time = ?, flood_wait_seconds = ? where phonenumber = ?"
+            t = (datetime.datetime.now(), second, phonenumber,)
+            self.conn.execute(command, t)
+            self.conn.commit()
+            return True    
+        except sqlite3.OperationalError:
+            return False            
 
     def GetStatus(self, phonenumber):
         command = "Select status from account where phonenumber=?"
@@ -120,7 +142,9 @@ class Database:
         except KeyboardInterrupt: # fix issue 19
             status = self.conn.execute(command, t)
             count = status.fetchone()[0]
-            return count            
+            return count
+        except sqlite3.OperationalError:
+            return 1                        
         except Exception as e:
             logging.info(type(e).__name__)
             return 1
@@ -133,6 +157,8 @@ class Database:
             return status.fetchone()
         except TypeError:
             return 0
+        except sqlite3.OperationalError:
+            return 0            
         except Exception as e:
             logging.info(type(e).__name__)
             return 0
@@ -144,6 +170,8 @@ class Database:
             deleted = self.conn.execute(command, t).rowcount
             self.conn.commit()
             return deleted
+        except sqlite3.OperationalError:
+            return False
         except Exception as e:
             logging.info(type(e).__name__)
             return False
@@ -152,6 +180,8 @@ class Database:
         try:
             res = self.conn.execute(command, t)
             return len(res.fetchall())
+        except sqlite3.OperationalError:
+            return False
         except Exception as e:
             logging.info(type(e).__name__)
             return False
@@ -160,6 +190,8 @@ class Database:
         try:
             command = 'Select * from account'
             return self.conn.execute(command).fetchall()
+        except sqlite3.OperationalError:
+            return None
         except Exception as e:
             logging.info(type(e).__name__)
             return None
