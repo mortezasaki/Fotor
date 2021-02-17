@@ -134,7 +134,11 @@ class Telegram:
                 return None
             except errors.ChannelInvalidError:
                 logging.info('The channel has invalid error')
-                return None  
+                return None
+            except errors.SessionPasswordNeededError: # Fix issue 23
+                logging.info('Two-steps verification is enabled and a password is required')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+                exit()                
             except sqlite3.OperationalError:
                 logging.info('sqlite OperationalError on Resolve')
                 return None                              
@@ -192,7 +196,11 @@ class Telegram:
                 return None
             except sqlite3.OperationalError:
                 logging.info('sqlite OperationalError on Resolve')
-                return None                
+                return None
+            except errors.SessionPasswordNeededError: # Fix issue 23
+                logging.info('Two-steps verification is enabled and a password is required')
+                db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+                exit()
             except Exception as e:
                 logging.info(type(e).__name__ + ' JoinChannel')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
@@ -255,6 +263,10 @@ class Telegram:
         except sqlite3.OperationalError:
             logging.info('sqlite OperationalError on Resolve')
             return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            exit()            
         except Exception as e:
             logging.info(type(e).__name__ + ' Resolve')
             return None
