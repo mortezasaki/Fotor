@@ -1,6 +1,14 @@
+import signal 
+# Fix issue 22
+# احساس میشه وقتی که در منوی لاگ کنترل سی زده میشه اگه در ابتدای این فایل باشه چون به قسمت هندل کردن 
+# KeyboardBreak نرسیده خطا میدهد.
+# به همین منظور هندل کردن این مورد را در ابتدای فایل می آوریم
+def handler(signum, frame):
+    print("ctrl+c")
+signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
+
 import asyncio
 import logging
-import signal
 from telegram import Telegram
 from sms_activate import SMSActivate
 import os
@@ -15,7 +23,6 @@ from datetime import datetime
 
 
 def main():
-    signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     LogInit()
     logging.info("Register new number...")
 
@@ -92,6 +99,7 @@ def main():
             sms_activate.CancelCode(status)
             DeleteSession(phone_number)
 
+
 def DeleteSession(phonenumber):
     file = '{0}{1}.session'.format(Config['account_path'], phonenumber)
     if os.path.exists(file):
@@ -113,10 +121,6 @@ def customTime(*args):
     my_tz = timezone("Asia/Tehran")
     converted = utc_dt.astimezone(my_tz)
     return converted.timetuple()
-
-
-def handler(signum, frame):
-    print("ctrl+c")
 
 if __name__ == "__main__":
     main()

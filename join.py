@@ -7,7 +7,16 @@
 از این کلاس برای جوین اتوماتیک در تلگرام استفاده میشود. ورودی این برنامه شماره تلفنی است که قبلا ثبت نام و لاگین شده است.
 با دریافت این شماره تلفن به دنبال یک سشن تلگرام میگردد و بعد از پیدا کردن آن وارد تلگرام میشود و شروع به جوین شدن میکند
 """
- 
+import signal 
+# Fix issue 22
+# احساس میشه وقتی که در منوی لاگ کنترل سی زده میشه اگه در ابتدای این فایل باشه چون به قسمت هندل کردن 
+# KeyboardBreak نرسیده خطا میدهد.
+# به همین منظور هندل کردن این مورد را در ابتدای فایل می آوریم
+def handler(signum, frame):
+    print("ctrl+c")
+signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
+
+
 import sys, requests
 from config import Config
 import os
@@ -17,7 +26,6 @@ from time import sleep
 from api import API
 from enums import *
 import getopt
-import signal
 from telegram import Telegram
 from database import Database
 from pytz import timezone, utc
@@ -42,7 +50,6 @@ def customTime(*args):
     return converted.timetuple()
 
 def main():
-    signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
     argv = sys.argv[1:] 
     loop = asyncio.get_event_loop()
     phone_number = ''
@@ -112,8 +119,7 @@ def ExistAccount(phonenumber):
             return True
     return False
 
-def handler(signum, frame):
-    print("ctrl+c")
+
 
 if __name__ == "__main__":
     main()
