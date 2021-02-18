@@ -90,7 +90,7 @@ class Telegram:
             logging.info('Fail to connect.')
             return False
         except Exception as e:
-            logging.info(type(e).__name__ + ' Connect')
+            logging.info(type(e).__name__, ' Connect')
         return False
 
     async def Search(self, username : str):
@@ -102,7 +102,7 @@ class Telegram:
                 logging.info('Value Error accured')                 
                 return None
             except errors.FloodWaitError as e:
-                logging.info('Flood wait for %s' % e.seconds)
+                logging.info('Flood wait for %s', e.seconds)
                 logging.info('Exit...')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
                 db.UpdateFlooWait(self.phone_number, e.seconds)
@@ -143,7 +143,7 @@ class Telegram:
                 logging.info('sqlite OperationalError on Resolve')
                 return None                              
             except Exception as e:
-                logging.info(type(e).__name__ + ' Search Channel')
+                logging.info(type(e).__name__, ' Search Channel')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
                 exit()              
             finally:
@@ -159,7 +159,7 @@ class Telegram:
                 logging.info('Value Error accured')                 
                 return None
             except errors.FloodWaitError as e:
-                logging.info('Flood wait for %s' % e.seconds)
+                logging.info('Flood wait for %s', e.seconds)
                 logging.info('Exit...')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
                 db.UpdateFlooWait(self.phone_number, e.seconds)
@@ -202,7 +202,7 @@ class Telegram:
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
                 exit()
             except Exception as e:
-                logging.info(type(e).__name__ + ' JoinChannel')
+                logging.info(type(e).__name__, ' JoinChannel')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
                 exit()
             finally:
@@ -214,7 +214,7 @@ class Telegram:
         try:
             return await self.tg_client(functions.contacts.ResolveUsernameRequest(username))
         except errors.FloodWaitError as e:
-            logging.info('Flood wait for %s' % e.seconds)
+            logging.info('Flood wait for %s', e.seconds)
             logging.info('Exit...')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
             db.UpdateFlooWait(self.phone_number, e.seconds)
@@ -268,7 +268,7 @@ class Telegram:
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
             exit()            
         except Exception as e:
-            logging.info(type(e).__name__ + ' Resolve')
+            logging.info(type(e).__name__, ' Resolve')
             return None
         finally:
             db.Close()

@@ -43,7 +43,7 @@ class API:
             logging.info("Can't connect to Membersgram Server")
             return None
         except Exception as e:
-            logging.info(type(e).__name__ + ' CallGetChannel')
+            logging.info(type(e).__name__, ' CallGetChannel')
         return None
 
     def CallJoin(self, _id : str):
@@ -60,7 +60,7 @@ class API:
             logging.info("Can't connect to Membersgram Server")
             return None
         except Exception as e:
-            logging.info(type(e).__name__ + ' CallJoin')                          
+            logging.info(type(e).__name__, ' CallJoin')                          
             return False
         return False
 
