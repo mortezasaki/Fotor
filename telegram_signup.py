@@ -33,7 +33,7 @@ def main():
 
     sms_activate = SMSActivate(Config['SMS_Activate_API'])
     balance = sms_activate.Balance()
-    logging.info("Your balance at sms-activate.ru is: %s" % balance)
+    logging.info("Your balance at sms-activate.ru is: %s", balance)
     logging.info('Get Countries list...')
     countries = sms_activate.SortCountriesByPrice()
 
@@ -59,7 +59,7 @@ def main():
                     try:
                         activation_code = sms_activate.GetActivationCode(status)
                         if activation_code is not None:
-                            logging.info('Activation code is: %s' % activation_code)
+                            logging.info('Activation code is: %s', activation_code)
                             break
                     except:
                         sms_activate.CancelCode(status)
@@ -93,9 +93,9 @@ def main():
             db.NewAccount(phone_number, sms_activate.GetCountryName(country_code), name, family,Gender.Man.value)
             db.UpdateStatus(phone_number, TelegramRegisterStats.Succesfull.value)
             db.Close()
-            logging.info('Complate %s sing up' % phone_number)
+            logging.info('Complate %s sing up', phone_number)
         else:
-            logging.info('Problem in sign up for %s' % phone_number)
+            logging.info('Problem in sign up for %s', phone_number)
             sms_activate.CancelCode(status)
             DeleteSession(phone_number)
 

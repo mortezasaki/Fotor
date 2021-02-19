@@ -59,7 +59,7 @@ def main():
             if opt in ['-a', '--account']: 
                 phone_number = arg
                 LogInit(phone_number)
-                logging.info('Start login to %s' % phone_number)
+                logging.info('Start login to %s', phone_number)
                 login = True
                 break
     
@@ -71,7 +71,7 @@ def main():
     # Fix #2
     if not ExistAccount(phone_number):
         sleep(1)
-        logging.info('%s not exist in accounts directory' % phone_number)        
+        logging.info('%s not exist in accounts directory', phone_number)        
         exit()
 
     telegram = Telegram(phone_number)
@@ -85,7 +85,7 @@ def main():
             if channel is not None:
                 try_to_connect_membersgram = 10
                 channel_username = channel['username']
-                logging.info('Joining to %s channel' % channel_username)
+                logging.info('Joining to %s channel', channel_username)
                 channel_id = channel['_id']
                 try:
                     joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
@@ -104,7 +104,7 @@ def main():
                     logging.info('Exit...')
                     exit()
                 except Exception as e:
-                    logging.info(type(e).__name__ + ' JoinClass')
+                    logging.info(type(e).__name__, ' JoinClass')
             else:
                 try_to_connect_membersgram = try_to_connect_membersgram - 1
         logging.info("Can't connect to membersgram server and exit")
