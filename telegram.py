@@ -21,7 +21,8 @@ class Telegram:
 
         self.tg_client = ''
 
-    def ValidUsername(self, username : str):
+    @staticmethod
+    def ValidUsername(username : str):
         pattern = r'^[a-zA-Z]\w{5,}$'
         if re.match(pattern, username):
             return True

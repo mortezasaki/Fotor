@@ -45,7 +45,8 @@ class FotorShell(cmd.Cmd):
         new_fotor = ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
         self.do_log(None, register_log = True)
 
-    def do_list(self, arg):
+    @staticmethod
+    def do_list(arg):
         'List of all running accounts'
         print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
         print('=' * 80)
@@ -124,7 +125,8 @@ class FotorShell(cmd.Cmd):
         db.Close()
 
     # Display system statistics. Issue #3
-    def do_statistics(self, arg):
+    @staticmethod
+    def do_statistics(arg):
         statistics = '''
 Fotor Statistics
 =====================
@@ -167,7 +169,8 @@ Joins = {7}
         statistics = statistics.format(accounts, running, flood, stop, ban, hasPassword, problem, joins, toMany)
         print(statistics)
 
-    def do_log(self, arg, register_log = False):
+    @staticmethod
+    def do_log(arg, register_log = False):
         'Log a joiner'
         if register_log or arg == 'register':
             ps.tail('logs/register.log', match=False)
@@ -187,7 +190,8 @@ Joins = {7}
             fotor = ps.start(['python', 'join.py', '--account', str(arg), '--log', 'debug', '-v'])
             self.do_log(arg)
 
-    def do_auto(self, arg):
+    @staticmethod
+    def do_auto(arg):
         'Automate Create account and join to channel with limitation'
         if arg == 'stop':
                 for p in psutil.process_iter():
@@ -207,7 +211,8 @@ Joins = {7}
                 ps.start(['python', 'auto.py'])
                 print('Start automation with account limitation %s' % Config['limit_account'])
 
-    def do_kill(self, arg):
+    @staticmethod
+    def do_kill(arg):
         'Terminate a process'
         # https://stackoverflow.com/a/17858114/9850815
         proccess = GetListOfAllProccess()
@@ -240,12 +245,14 @@ Joins = {7}
         db.Close()
 
 
-    def do_balance(self, arg):
+    @staticmethod
+    def do_balance(arg):
         'Get sms-activate balance'
         sms = SMSActivate(Config['SMS_Activate_API'])
         print('sms-activate.ru balance is: %s' % sms.Balance())
 
-    def do_register(self, args):
+    @staticmethod
+    def do_register(args):
         'Register new number to account database'
         account_info = args.split()
         if len(account_info) == 6:
@@ -257,14 +264,17 @@ Joins = {7}
         else:
             print("Use this value => phonenumber country firstname family gender status")
 
-    def do_banner(self,arg):
+    @staticmethod
+    def do_banner(arg):
         print(banner)
 
-    def do_exit(self, arg):
+    @staticmethod
+    def do_exit(arg):
         'Exit from shell'
         exit()
 
-    def do_createdb(self, arg):
+    @staticmethod
+    def do_createdb(arg):
         'Initial create database.'
         if not os.path.exists('data.db'):
             db = Database()
