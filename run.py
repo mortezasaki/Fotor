@@ -7,7 +7,8 @@ from config import Config
 import re
 from database import Database
 from enums import *
-import os, utility
+import os
+import utility
 import datetime
 
 banner = '''
