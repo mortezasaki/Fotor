@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import sys
 import utility
 import datetime
 import logging
@@ -11,11 +12,11 @@ class Database:
         try:
             self.conn = sqlite3.connect('data.db', timeout=30.0)
         except sqlite3.OperationalError:
-            exit()
+            sys.exit()
         except SystemExit:
             logging.info('Error in loading database...')
             sleep(1)
-            exit()
+            sys.exit()
 
     def Create(self):
         c = self.conn.cursor()

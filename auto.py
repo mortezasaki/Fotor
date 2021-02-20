@@ -6,6 +6,7 @@ import os
 from config import Config
 from enums import *
 from database import Database
+import sys
 import utility
 import ps
 import random
@@ -66,7 +67,7 @@ def CheckLimitation():
     if not accounts: # Fix issue 21
         logging.info('Cant connect to database be sure that data.db exist or execude `createdb` command')
         sleep(1)
-        exit()
+        sys.exit()
     count_of_account_created_today = 0
 
     for account in accounts:

@@ -67,13 +67,13 @@ def main():
     except Exception as e:
         logging.info(str(e))
         logging.info(type(e).__name__)
-        exit()
+        sys.exit()
 
     # Fix #2
     if not ExistAccount(phone_number):
         sleep(1)
         logging.info('%s not exist in accounts directory', phone_number)        
-        exit()
+        sys.exit()
 
     telegram = Telegram(phone_number)
     if loop.run_until_complete(telegram.Connect()):
@@ -100,10 +100,10 @@ def main():
 
                 except ConnectionError:
                     logging.info('Connection error')                          
-                    exit()
+                    sys.exit()
                 except SystemExit:
                     logging.info('Exit...')
-                    exit()
+                    sys.exit()
                 except Exception as e:
                     logging.info(type(e).__name__, ' JoinClass')
             else:

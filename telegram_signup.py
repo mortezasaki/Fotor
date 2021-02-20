@@ -1,11 +1,8 @@
 import signal 
-# Fix issue 22
-# احساس میشه وقتی که در منوی لاگ کنترل سی زده میشه اگه در ابتدای این فایل باشه چون به قسمت هندل کردن 
-# KeyboardBreak نرسیده خطا میدهد.
-# به همین منظور هندل کردن این مورد را در ابتدای فایل می آوریم
-def handler(signum, frame):
-    print("ctrl+c")
-signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
+
+import asyncio
+import logging
+import sys
 
 import asyncio
 import logging
@@ -67,7 +64,7 @@ def main():
         else:
             sleep(1)
             logging.info('Your money on sms-activate.ru is low. please recharge it')
-            exit()
+            sys.exit()
         
         # Fix issue # 5
         DeleteSession(phone_number)
