@@ -3,9 +3,6 @@ import signal
 import asyncio
 import logging
 import sys
-
-import asyncio
-import logging
 from telegram import Telegram
 from sms_activate import SMSActivate
 import os
