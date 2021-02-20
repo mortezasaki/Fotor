@@ -1,10 +1,13 @@
 # For Issue 7
 
-import psutil, re, os
+import psutil
+import re
+import os
 from config import Config
 from enums import *
 from database import Database
-import utility, ps
+import utility
+import ps
 import random
 from time import sleep
 import datetime

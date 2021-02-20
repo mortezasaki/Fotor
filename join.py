@@ -17,7 +17,8 @@ def handler(signum, frame):
 signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
 
 
-import sys, requests
+import sys
+import requests
 from config import Config
 import os
 import asyncio
