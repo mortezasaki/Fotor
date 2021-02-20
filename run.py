@@ -1,5 +1,6 @@
 import cmd
 import ps
+import sys
 from time import sleep
 import psutil
 from sms_activate import SMSActivate
@@ -272,7 +273,7 @@ Joins = {7}
     @staticmethod
     def do_exit(arg):
         'Exit from shell'
-        exit()
+        sys.exit()
 
     @staticmethod
     def do_createdb(arg):
