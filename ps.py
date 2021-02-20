@@ -38,7 +38,7 @@ def terminate(process):
 
 # https://stackoverflow.com/a/12523371/9850815
 def tail(filename, searched = None, match = True):
-    if not filename in ('logs/register.log', 'logs/join.log'): # fix security issue for filename
+    if filename not in ('logs/register.log', 'logs/join.log'): # fix security issue for filename
         return False
     f = subprocess.Popen(['tail','-F',filename],\
         stdout=subprocess.PIPE,stderr=subprocess.PIPE)
