@@ -1,5 +1,4 @@
 import signal 
-
 import asyncio
 import logging
 import sys
@@ -14,7 +13,12 @@ from time import sleep
 from database import Database
 from pytz import timezone, utc
 from datetime import datetime
+import random
 
+
+def GenerateUserName(name, family):
+    user_name = '{0}{1}{2}'.format(name, family, random.randint(11111,999999999))
+    return user_name
 
 def main():
     LogInit()
@@ -80,14 +84,21 @@ def main():
         logging.info('Sign Up in Telegram...')
         is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
         if is_signup:
+            username = GenerateUserName(name, family)
+            is_set_username = loop.run_until_complete(telegram.SetUserName(username))
+            if is_set_username:
+                logging.info('Account username is %s', username)
+
             sms_activate.ConfirmCode(status)
             _api = API(phone_number)
             _api.CallRegisterAPI(name, family ,Gender.Man.value,sms_activate.GetCountryName(country_code),status =TelegramRegisterStats.Succesfull.value)
             db = Database()
-            db.NewAccount(phone_number, sms_activate.GetCountryName(country_code), name, family,Gender.Man.value)
+            db.NewAccount(phone_number, username, sms_activate.GetCountryName(country_code), name, family,Gender.Man.value)
             db.UpdateStatus(phone_number, TelegramRegisterStats.Succesfull.value)
             db.Close()
             logging.info('Complate %s sing up', phone_number)
+
+
         else:
             logging.info('Problem in sign up for %s', phone_number)
             sms_activate.CancelCode(status)

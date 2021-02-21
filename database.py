@@ -24,6 +24,7 @@ class Database:
         # Create table
         c.execute('''CREATE TABLE account
                     (phonenumber text PRIMARY KEY,
+                    username text,
                     country text,
                     firstname text,
                     family text,
@@ -49,11 +50,11 @@ class Database:
         # We can also close the connection if we are done with it.
         # Just be sure any changes have been committed or they will be lost.
     
-    def NewAccount(self, phonenumber, country, firstname, family, gender):
+    def NewAccount(self, phonenumber, username, country, firstname, family, gender):
         if utility.ValidatePhone(phonenumber):
             try:
                 c = self.conn.cursor()
-                command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0,'None',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
+                command = "INSERT INTO account VALUES ('%s','%s','%s','%s','%s',%s,'%s',0,'None',0)" % (phonenumber, username, country, firstname, family, gender, datetime.datetime.now())
                 c.execute(command)
                 
                 # Save (commit) the changes
@@ -130,6 +131,25 @@ class Database:
             return True    
         except sqlite3.OperationalError:
             return False            
+
+    def GetUserName(self, phonenumber):
+        command = "Select username from account where phonenumber=?"
+        t = (phonenumber,)
+        try:
+            username = self.conn.execute(command, t)
+            username = username.fetchone()[0]
+            return username
+        except TypeError:
+            return None
+        except KeyboardInterrupt: # fix issue 19
+            username = self.conn.execute(command, t)
+            username = username.fetchone()[0]
+            return username
+        except sqlite3.OperationalError:
+            return None                        
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return None
 
     def GetStatus(self, phonenumber):
         command = "Select status from account where phonenumber=?"

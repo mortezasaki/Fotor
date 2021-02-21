@@ -50,7 +50,7 @@ class FotorShell(cmd.Cmd):
     @staticmethod
     def do_list(arg):
         'List of all running accounts'
-        print(f'{"PhoneNumber":<20}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
+        print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
         print('=' * 80)
 
 
@@ -81,10 +81,11 @@ class FotorShell(cmd.Cmd):
                 if file.endswith(".session"):
                     phone_number = file.split('.')[0]
                     if utility.ValidatePhone(phone_number):
-                        db.NewAccount(phone_number, 'Test', 'Test', 'Test', 0)
+                        db.NewAccount(phone_number, 'Test', 'Test', 'Test', 'Test', 0)
                         status = db.GetStatus(phone_number)
                         joins = db.CountOfJoins(phone_number)
-                        accounts.append({'Phone' : phone_number, 'Status' : status, 'Joins' : joins })
+                        username = db.GetUserName(phone_number)
+                        accounts.append({'Phone' : phone_number, 'UserName' : username, 'Status' : status, 'Joins' : joins })
             accounts = utility.SortListOfDict(accounts,'Joins')        
             if accounts is not None:
                 for account in accounts:
@@ -120,7 +121,8 @@ class FotorShell(cmd.Cmd):
                             
                         phone_number = account['Phone']
                         joins = account['Joins']
-                        print(f'{phone_number:<20}', f'{status:<20}', f'{joins:<20}', f'{floodWait:<20}') 
+                        user_name = account['UserName'] if account['UserName'] is not None else 'None'
+                        print(f'{phone_number:<20}', f'{user_name:<30}', f'{status:<20}', f'{joins:<20}', f'{floodWait:<20}') 
         except FileNotFoundError:
             print('No such file or directory')
 
