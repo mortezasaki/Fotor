@@ -24,6 +24,7 @@ class Database:
         # Create table
         c.execute('''CREATE TABLE account
                     (phonenumber text PRIMARY KEY,
+                    username text,
                     country text,
                     firstname text,
                     family text,
@@ -49,11 +50,11 @@ class Database:
         # We can also close the connection if we are done with it.
         # Just be sure any changes have been committed or they will be lost.
     
-    def NewAccount(self, phonenumber, country, firstname, family, gender):
+    def NewAccount(self, phonenumber, country, username, firstname, family, gender):
         if utility.ValidatePhone(phonenumber):
             try:
                 c = self.conn.cursor()
-                command = "INSERT INTO account VALUES ('%s','%s','%s','%s',%s,'%s',0,'None',0)" % (phonenumber, country, firstname, family, gender, datetime.datetime.now())
+                command = "INSERT INTO account VALUES ('%s','%s','%s','%s','%s',%s,'%s',0,'None',0)" % (phonenumber, username, country, firstname, family, gender, datetime.datetime.now())
                 c.execute(command)
                 
                 # Save (commit) the changes

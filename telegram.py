@@ -3,6 +3,7 @@ from config import Config
 import sys
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.functions.account import UpdateProfileRequest
 from telethon import errors, functions
 import asyncio
 import utility
@@ -282,3 +283,18 @@ class Telegram:
             if not dialog.is_group and dialog.is_channel:
                 channels.append(dialog)
         return channels
+
+    async def SetUserName(self, username):
+        try:
+            await self.tg_client(UpdateProfileRequest(username))
+            return True
+        except errors.UsernameInvalidError:
+            logging.info('Nobody is using this username, or the username is unacceptable. If the latter, it must match r"[a-zA-Z][\w\d]{3,30}[a-zA-Z\d]".')
+        except errors.UsernameNotModifiedError:
+            logging.info('The username is not different from the current username.')
+        except errors.UsernameOccupiedError:
+            logging.info('The username is already taken.')
+        except Exception as e:
+            logging.info(type(e).__name__, 'SetUserName')
+        
+        return False
