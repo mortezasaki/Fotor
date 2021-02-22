@@ -298,3 +298,37 @@ class Telegram:
             logging.info(type(e).__name__, 'SetUserName')
         
         return False
+
+    async def SetBio(self, bio):
+        try:
+            await self.tg_client(functions.account.UpdateProfileRequest(about = bio))
+            return True
+        except errors.AboutTooLongError:
+            logging.info('The provided bio is too long.')
+        except Exception as e:
+            logging.info(type(e).__name__, 'SetBio')   
+        
+        return False
+
+    async def SetProfileImage(self, img_address):
+        try:
+            await self.tg_client(functions.photos.UploadProfilePhotoRequest(
+                file = await self.tg_client.upload_file(img_address)
+            ))
+            return True
+        except errors.AlbumPhotosTooManyError:
+            logging.info('Too many photos were included in the album.')
+        except errors.FilePartsInvalidError:
+            logging.info('The number of file parts is invalid.')
+        except errors.ImageProcessFailedError:
+            logging.info('Failure while processing image.')
+        except errors.PhotoCropSizeSmallError:
+            logging.info('Photo is too small.')
+        except errors.PhotoExtInvalidError:
+            logging.info('The extension of the photo is invalid.')
+        except errors.VideoFileInvalidError:
+            logging.info('The given video cannot be used.')
+        except Exception as e:
+            logging.info(type(e).__name__, 'SetProfileImage')
+        
+        return False

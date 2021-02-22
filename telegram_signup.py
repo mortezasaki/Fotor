@@ -14,11 +14,38 @@ from database import Database
 from pytz import timezone, utc
 from datetime import datetime
 import random
+from essential_generators import DocumentGenerator
+import re
+import requests
+import shutil
 
 
 def GenerateUserName(name, family):
     user_name = '{0}{1}{2}'.format(name, family, random.randint(11111,999999999))
-    return user_name
+    pattern = r'[^A-Za-z0-9]+' # remove Invalid character from user name https://stackoverflow.com/a/5843547/9850815
+    user_name = re.sub(pattern, '', user_name) # Sanitize username
+    if Telegram.ValidUsername(user_name):
+        return user_name
+    return None
+
+def GenerateProfilePicture(filename):
+    url = 'https://thispersondoesnotexist.com/image'
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        if not os.path.exists(r'img/'):
+            os.mkdir('img')
+        img_address = 'img/%s.jpg' % filename
+        with open(img_address, 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+            return img_address
+    return None
+
+def GenerateBio():
+    gen = DocumentGenerator()
+    bio = gen.sentence()
+    bio = bio[:70] # Telegram bio max lenght
+    return bio
 
 def main():
     LogInit()
@@ -85,9 +112,24 @@ def main():
         is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
         if is_signup:
             username = GenerateUserName(name, family)
-            is_set_username = loop.run_until_complete(telegram.SetUserName(username))
-            if is_set_username:
-                logging.info('Account username is %s', username)
+            if username is not None:
+                sleep(random.randint(1,5))
+                is_set_username = loop.run_until_complete(telegram.SetUserName(username))
+                if is_set_username:
+                    logging.info('Account username is %s', username)
+            
+            sleep(random.randint(1,5))
+            bio = GenerateBio()
+            is_set_bio = loop.run_until_complete(telegram.SetBio(bio))
+            if is_set_bio:
+                logging.info('User bio is %s', bio)
+
+            sleep(random.randint(1,5))
+            profile_img = GenerateProfilePicture(phone_number)
+            if profile_img is not None:
+                is_set_profile_img = loop.run_until_complete(telegram.SetProfileImage(profile_img))
+                if is_set_profile_img:
+                    logging.info('Set image for account has been done!')
 
             sms_activate.ConfirmCode(status)
             _api = API(phone_number)
@@ -127,5 +169,5 @@ def customTime(*args):
     converted = utc_dt.astimezone(my_tz)
     return converted.timetuple()
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     main()
