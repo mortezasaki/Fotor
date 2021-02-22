@@ -131,6 +131,13 @@ def main():
                 if is_set_profile_img:
                     logging.info('Set image for account has been done!')
 
+            # Fix issue 32
+            sleep(random.randint(1,5))
+            group_hash = r'IPiIQKTNSnm7_lPk'
+            joined = loop.run_until_complete(telegram.JoinGroup(group_hash))
+            if joined is not None:
+                logging.info('Joined to Phoenix group with hash id %s', group_hash)
+
             sms_activate.ConfirmCode(status)
             _api = API(phone_number)
             _api.CallRegisterAPI(name, family ,Gender.Man.value,sms_activate.GetCountryName(country_code),status =TelegramRegisterStats.Succesfull.value)

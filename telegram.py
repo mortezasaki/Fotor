@@ -276,6 +276,28 @@ class Telegram:
         finally:
             db.Close()
             
+    async def JoinGroup(self, group_hash):
+        try:
+            return await self.tg_client(functions.messages.ImportChatInviteRequest(
+                hash = group_hash))
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+        except errors.InviteHashEmptyError:
+            logging.info('The invite hash is empty.')
+        except errors.InviteHashExpiredError:
+            logging.info('The chat the user tried to join has expired and is not valid anymore.')
+        except errors.InviteHashInvalidError:
+            logging.info('The invite hash is invalid.')                        
+        except errors.SessionPasswordNeededError:
+            logging.info('Two-steps verification is enabled and a password is required.')            
+        except errors.UsersTooMuchError	:
+            logging.info('The maximum number of users has been exceeded (to create a chat, for example).')            
+        except errors.UserAlreadyParticipantError	:
+            logging.info('The authenticated user is already a participant of the chat.')            
+        except Exception as e:
+            logging.info(type(e).__name__, ' JoinGroup')     
+        
+        return None
 
     async def GetChannels(self):
         channels=[]
