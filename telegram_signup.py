@@ -82,7 +82,7 @@ def main():
                     logging.info('The activation code telegram was sent')
                     logging.info('Wait for activation code...')
                     try:
-                        activation_code = sms_activate.GetActivationCode(status)
+                        activation_code = sms_activate.GetActivationCode(status, wait = 8)
                         if activation_code is not None:
                             logging.info('Activation code is: %s', activation_code)
                             break
