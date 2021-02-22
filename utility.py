@@ -147,15 +147,21 @@ def GetProxy(retry : int = 5, wait : float = 5, method : int = 0):
 def CreateSentense():
     # https://stackoverflow.com/a/10820002/9850815
     filesize = 511_306_255                  #size of the really big file
-    offset = random.randrange(filesize)
-
-    f = open('sentences.csv')
-    f.seek(offset)                  #go to random position
-    f.readline()                    # discard - bound to be partial line
-    random_line = f.readline()      # bingo!
-    f.close()
-    sentence = random_line.split('\t') # random line like is `90	deu	Das war ein böses Kaninchen.`
-    return sentence[-1].strip()
+    while True:
+        try:
+            offset = random.randrange(filesize)
+            f = open('sentences.csv')
+            f.seek(offset)                  #go to random position
+            f.readline()                    # discard - bound to be partial line
+            random_line = f.readline()      # bingo!
+            f.close()
+            sentence = random_line.split('\t') # random line like is `90	deu	Das war ein böses Kaninchen.`
+            return sentence[-1].strip()
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            print(type(e).__name__, 'CreateSentense')
+            continue
 
 def GetRandomEmoji():
     emojies = ('😀','😃','😄','😁','😆','😅','😂','🤣','☺️','😊','😇','🙂','🙃',
