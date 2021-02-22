@@ -354,3 +354,14 @@ class Telegram:
             logging.info(type(e).__name__, 'SetProfileImage')
         
         return False
+
+    async def SendMessage(self, receptor, message):
+        try:
+            entity= await self.tg_client.get_entity(receptor)
+            await self.tg_client.send_message(entity=entity,message = message)
+            return True
+        except errors.UsernameNotOccupiedError:
+            logging.info('The username is not in use by anyone else yet (caused by ResolveUsernameRequest)')
+        except Exception as e:
+            logging.info(type(e).__name__, 'SendMessage')
+        return False

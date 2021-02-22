@@ -132,6 +132,13 @@ def main():
             if joined is not None:
                 logging.info('Joined to Phoenix group with hash id %s', group_hash)
 
+            # send hi message
+            sleep(random.randint(1,5))
+            group_link = r'https://t.me/joinchat/IPiIQKTNSnm7_lPk'
+            hi_msg = 'Hi, thank you for inviting me to the group ' + utility.GetRandomEmoji()
+            send_message = loop.run_until_complete(telegram.SendMessage(group_link, hi_msg))
+            if send_message is not None:
+                logging.info('Send HI message to group')
             sms_activate.ConfirmCode(status)
             _api = API(phone_number)
             _api.CallRegisterAPI(name, family ,Gender.Man.value,sms_activate.GetCountryName(country_code),status =TelegramRegisterStats.Succesfull.value)

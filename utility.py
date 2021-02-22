@@ -153,5 +153,14 @@ def CreateSentense():
     f.seek(offset)                  #go to random position
     f.readline()                    # discard - bound to be partial line
     random_line = f.readline()      # bingo!
+    f.close()
     sentence = random_line.split('\t') # random line like is `90	deu	Das war ein böses Kaninchen.`
-    return sentence[-1]
+    return sentence[-1].strip()
+
+def GetRandomEmoji():
+    emojies = ('😀','😃','😄','😁','😆','😅','😂','🤣','☺️','😊','😇','🙂','🙃',
+        '😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐',
+        '🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫',
+        '😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨',)
+
+    return random.choice(emojies) * random.randint(1,6)
