@@ -14,7 +14,6 @@ from database import Database
 from pytz import timezone, utc
 from datetime import datetime
 import random
-from essential_generators import DocumentGenerator
 import re
 import requests
 import shutil
@@ -40,12 +39,6 @@ def GenerateProfilePicture(filename):
             shutil.copyfileobj(r.raw, f)
             return img_address
     return None
-
-def GenerateBio():
-    gen = DocumentGenerator()
-    bio = gen.sentence()
-    bio = bio[:70] # Telegram bio max lenght
-    return bio
 
 def main():
     LogInit()
@@ -119,7 +112,8 @@ def main():
                     logging.info('Account username is %s', username)
             
             sleep(random.randint(1,5))
-            bio = GenerateBio()
+            bio = utility.CreateSentense()
+            bio = bio[:70]
             is_set_bio = loop.run_until_complete(telegram.SetBio(bio))
             if is_set_bio:
                 logging.info('User bio is %s', bio)
