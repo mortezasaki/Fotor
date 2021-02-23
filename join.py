@@ -90,7 +90,7 @@ def main():
             2, # Send gif
             3, # Send a random sentense
             4, # Mention user
-            # 4, # Forward channel post message
+            5, # Forward channel post message
             # 5, # Send picture
         ]
 
@@ -152,7 +152,15 @@ def main():
                 msg = r'@' + user_name
                 mention_user = loop.run_until_complete(telegram.SendMessage(group_link, msg))
                 if mention_user is not None:
-                        logging.info('Mentioned %s', user_name) 
+                        logging.info('Mentioned %s', user_name)
+            elif do_action == 5: # Forward message
+                famous_channels = ['varzesh3','gizmiztel','AKHARINKHABAR','PERSPOLIS','KHOOROOSJANGI','nagahan_com','ESTEGHLALPAGE']
+                channel = random.choice(famous_channels)
+                messages = loop.run_until_complete(telegram.GetMessage(channel))
+                msg = random.choice(messages)
+                send_forward_message = loop.run_until_complete(telegram.ForwardMessage(group_link, msg))
+                if send_forward_message is not None:
+                    logging.info('Forward a message from %s to Phoenix group', channel)
             sleep(random.randint(5,15))     
 
                     
