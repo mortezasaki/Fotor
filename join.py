@@ -89,6 +89,7 @@ def main():
             1, # Send emoji
             2, # Send gif
             3, # Send a random sentense
+            4, # Mention user
             # 4, # Forward channel post message
             # 5, # Send picture
         ]
@@ -144,6 +145,14 @@ def main():
                 send_message = loop.run_until_complete(telegram.SendMessage(group_link, sentense))
                 if send_message is not None:
                     logging.info('Sending message to group')   
+            elif do_action == 4: # Mention a user
+                messages = loop.run_until_complete(telegram.GetMessage(group_link))
+                random_message = random.choice(messages)
+                user_name = random_message.sender.username
+                msg = r'@' + user_name
+                mention_user = loop.run_until_complete(telegram.SendMessage(group_link, msg))
+                if mention_user is not None:
+                        logging.info('Mentioned %s', user_name) 
             sleep(random.randint(5,15))     
 
                     
