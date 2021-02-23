@@ -178,7 +178,7 @@ def DownloadGif():
         os.mkdir('gifs')
     api = r'https://api.giphy.com/v1/gifs/trending?api_key=XrXXvX8o79fDZRMjFVGOZY7sztx17TYu&limit=25&rating=g'            
     req = requests.get(api)
-    if req.status_code == 200 and 1==2:
+    if req.status_code == 200:
         data = req.json()
         selected_gif = random.randint(0,9)       
         gif_address = data['data'][selected_gif]['images']['original']['url']

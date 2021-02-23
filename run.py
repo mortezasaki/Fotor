@@ -222,7 +222,7 @@ Joins = {7}
         proccess = GetListOfAllProccess()
         found = False
         for p in proccess:
-            if p['Phone'] == arg:
+            if p['Phone'] == arg or arg in ('all', 'All', 'ALL'):
                 found = True
                 try :
                     p = psutil.Process(p['PID'])

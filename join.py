@@ -85,6 +85,8 @@ def main():
         group_link = r'https://t.me/joinchat/IPiIQKTNSnm7_lPk'
 
         action = [
+            -2, # Join Channel
+            -1, # Join Channel
             0, # Join channel
             1, # Send emoji
             2, # Send gif
@@ -93,11 +95,12 @@ def main():
             5, # Forward channel post message
             # 5, # Send picture
         ]
-
         while True:
+            db = Database()
+            db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
             emoji = utility.GetRandomEmoji()
             do_action = random.choice(action)
-            if do_action == 0: # Join   
+            if do_action in (-2, -1, 0): # Join   
                 try_to_connect_membersgram = 10
                 while try_to_connect_membersgram > 0: # fix Issue 15
                     channel = _api.CallGetChannel()
@@ -109,10 +112,7 @@ def main():
                         try:
                             joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
                             if joined is not None:
-                                db = Database()
                                 db.Join(phone_number, channel_username)
-                                db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
-                                db.Close()
                                 if _api.CallJoin(channel_id):
                                     logging.info('Join was done')
                                     break
@@ -147,20 +147,24 @@ def main():
                     logging.info('Sending message to group')   
             elif do_action == 4: # Mention a user
                 messages = loop.run_until_complete(telegram.GetMessage(group_link))
-                random_message = random.choice(messages)
-                user_name = random_message.sender.username
-                msg = r'@' + user_name
-                mention_user = loop.run_until_complete(telegram.SendMessage(group_link, msg))
-                if mention_user is not None:
-                        logging.info('Mentioned %s', user_name)
+                if messages is not None:
+                    random_message = random.choice(messages)
+                    user_name = random_message.sender.username
+                    if user_name is not None:
+                        msg = r'@' + user_name
+                        mention_user = loop.run_until_complete(telegram.SendMessage(group_link, msg))
+                        if mention_user is not None:
+                                logging.info('Mentioned %s', user_name)
             elif do_action == 5: # Forward message
                 famous_channels = ['varzesh3','gizmiztel','AKHARINKHABAR','PERSPOLIS','KHOOROOSJANGI','nagahan_com','ESTEGHLALPAGE']
                 channel = random.choice(famous_channels)
                 messages = loop.run_until_complete(telegram.GetMessage(channel))
-                msg = random.choice(messages)
-                send_forward_message = loop.run_until_complete(telegram.ForwardMessage(group_link, msg))
-                if send_forward_message is not None:
-                    logging.info('Forward a message from %s to Phoenix group', channel)
+                if messages is not None:
+                    msg = random.choice(messages)
+                    send_forward_message = loop.run_until_complete(telegram.ForwardMessage(group_link, msg))
+                    if send_forward_message is not None:
+                        logging.info('Forward a message from %s to Phoenix group', channel)
+            db.Close()
             sleep(random.randint(5,15))     
 
                     

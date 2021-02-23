@@ -279,6 +279,7 @@ class Telegram:
             
     async def JoinGroup(self, group_hash):
         try:
+            db = Database()
             return await self.tg_client(functions.messages.ImportChatInviteRequest(
                 hash = group_hash))
         except errors.ChannelsTooMuchError:
@@ -295,8 +296,54 @@ class Telegram:
             logging.info('The maximum number of users has been exceeded (to create a chat, for example).')            
         except errors.UserAlreadyParticipantError	:
             logging.info('The authenticated user is already a participant of the chat.')            
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('The user has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+            logging.info('Account has auth problem')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
+            sys.exit()
+        except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+            logging.info('Account has password')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            sys.exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            sys.exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            sys.exit()
         except Exception as e:
-            logging.info(type(e).__name__, ' JoinGroup')     
+            logging.info(type(e).__name__, ' JoinChannel')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+            sys.exit()
+        finally:
+            db.Close()                            
         
         return None
 
@@ -378,8 +425,59 @@ class Telegram:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
             sys.exit()            
+        except ValueError:
+            logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
+            group_hash = r'IPiIQKTNSnm7_lPk'
+            await self.JoinGroup(group_hash)
+            logging.info('Joining to Phoenix group')   
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('The user has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+            logging.info('Account has auth problem')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
+            sys.exit()
+        except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+            logging.info('Account has password')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            sys.exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            sys.exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            sys.exit()
         except Exception as e:
-            logging.info(type(e).__name__, 'SendMessage')
+            logging.info(type(e).__name__, ' SendMessage')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+            sys.exit()
+        finally:
+            db.Close()                                    
         return False
 
     async def SendFile(self, receptor, file_address):
@@ -402,8 +500,57 @@ class Telegram:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
             sys.exit()                  
+        except ValueError:
+            logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
+            group_hash = r'IPiIQKTNSnm7_lPk'
+            await self.JoinGroup(group_hash)
+            logging.info('Joining to Phoenix group')            
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('The user has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+            logging.info('Account has auth problem')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
+            sys.exit()
+        except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+            logging.info('Account has password')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            sys.exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            sys.exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            sys.exit()
         except Exception as e:
-            logging.info(type(e).__name__, 'SendFile')
+            logging.info(type(e).__name__, ' SendFile')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+            sys.exit()            
         return False
 
     async def GetMessage(self, chat):
@@ -419,9 +566,58 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()                  
+            sys.exit()
+        except ValueError:
+            logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
+            group_hash = r'IPiIQKTNSnm7_lPk'
+            await self.JoinGroup(group_hash)
+            logging.info('Joining to Phoenix group')
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('The user has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+            logging.info('Account has auth problem')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
+            sys.exit()
+        except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+            logging.info('Account has password')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            sys.exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            sys.exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            sys.exit()
         except Exception as e:
-            logging.info(type(e).__name__, 'SendFile')
+            logging.info(type(e).__name__, ' SendFile')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+            sys.exit()             
         
         return None
 
@@ -437,7 +633,56 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()              
+            sys.exit()
+        except ValueError:
+            logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
+            group_hash = r'IPiIQKTNSnm7_lPk'
+            await self.JoinGroup(group_hash)
+            logging.info('Joining to Phoenix group')  
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('The user has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
+            logging.info('Account has auth problem')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
+            os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
+            sys.exit()
+        except errors.SessionPasswordNeededError: # TODO: Handle when account has password
+            logging.info('Account has password')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            sys.exit()
+        except errors.ChannelsTooMuchError:
+            logging.info('You have joined too many channels/supergroups.')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.ToMany.value)
+            sys.exit()
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+            return None
+        except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
+            pass
+        except errors.ChannelBannedError:
+            logging.info('The channel is banned')
+            return None
+        except errors.ChannelInvalidError:
+            logging.info('The channel has invalid error')
+            return None
+        except sqlite3.OperationalError:
+            logging.info('sqlite OperationalError on Resolve')
+            return None
+        except errors.SessionPasswordNeededError: # Fix issue 23
+            logging.info('Two-steps verification is enabled and a password is required')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            sys.exit()
         except Exception as e:
-            logging.info(type(e).__name__, 'ForwardMessage')
+            logging.info(type(e).__name__, ' ForwardMessage')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
+            sys.exit()                                     
         return None
