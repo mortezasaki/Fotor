@@ -358,6 +358,7 @@ class Telegram:
 
     async def SendMessage(self, receptor, message):
         try:
+            db = Database()
             entity= await self.tg_client.get_entity(receptor)
             reply = random.choice([0,1])
             if reply == 0 : # No replay a message
@@ -369,12 +370,21 @@ class Telegram:
             return True
         except errors.UsernameNotOccupiedError:
             logging.info('The username is not in use by anyone else yet (caused by ResolveUsernameRequest)')
+        except errors.UserDeactivatedError:
+            logging.info('User has been deactivate')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()            
         except Exception as e:
             logging.info(type(e).__name__, 'SendMessage')
         return False
 
     async def SendFile(self, receptor, file_address):
         try:
+            db = Database()
             entity= await self.tg_client.get_entity(receptor)
             reply = random.choice([0,1])
             if reply == 0 : # No replay a message
@@ -384,16 +394,50 @@ class Telegram:
                 msg_id = random.choice(messages).id
                 await self.tg_client.send_file(entity, file_address, reply_to = msg_id)
             return True
+        except errors.UserDeactivatedError:
+            logging.info('User has been deactivate')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()                  
         except Exception as e:
             logging.info(type(e).__name__, 'SendFile')
         return False
 
     async def GetMessage(self, chat):
         try:
+            db = Database()
             entity= await self.tg_client.get_entity(chat)
             messages = await self.tg_client.get_messages(entity, limit = 5)
             return messages
+        except errors.UserDeactivatedError:
+            logging.info('User has been deactivate')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()                  
         except Exception as e:
             logging.info(type(e).__name__, 'SendFile')
         
+        return None
+
+    async def ForwardMessage(self, chat, message):
+        try:
+            db = Database()
+            entity= await self.tg_client.get_entity(chat)
+            return await self.tg_client.forward_messages(entity, message)
+        except errors.UserDeactivatedError:
+            logging.info('User has been deactivate')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            sys.exit()              
+        except Exception as e:
+            logging.info(type(e).__name__, 'ForwardMessage')
         return None
