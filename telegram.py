@@ -14,6 +14,7 @@ from time import sleep
 from enums import *
 from database import Database
 import sqlite3
+import random
 
 class Telegram:
     def __init__(self, phone_number):
@@ -358,10 +359,41 @@ class Telegram:
     async def SendMessage(self, receptor, message):
         try:
             entity= await self.tg_client.get_entity(receptor)
-            await self.tg_client.send_message(entity=entity,message = message)
+            reply = random.choice([0,1])
+            if reply == 0 : # No replay a message
+                await self.tg_client.send_message(entity=entity,message = message)
+            else:
+                messages = await self.GetMessage(entity)
+                msg_id = random.choice(messages).id
+                await self.tg_client.send_message(entity=entity,message = message, reply_to = msg_id)               
             return True
         except errors.UsernameNotOccupiedError:
             logging.info('The username is not in use by anyone else yet (caused by ResolveUsernameRequest)')
         except Exception as e:
             logging.info(type(e).__name__, 'SendMessage')
         return False
+
+    async def SendFile(self, receptor, file_address):
+        try:
+            entity= await self.tg_client.get_entity(receptor)
+            reply = random.choice([0,1])
+            if reply == 0 : # No replay a message
+                await self.tg_client.send_file(entity, file_address)
+            else:
+                messages = await self.GetMessage(entity)
+                msg_id = random.choice(messages).id
+                await self.tg_client.send_file(entity, file_address, reply_to = msg_id)
+            return True
+        except Exception as e:
+            logging.info(type(e).__name__, 'SendFile')
+        return False
+
+    async def GetMessage(self, chat):
+        try:
+            entity= await self.tg_client.get_entity(chat)
+            messages = await self.tg_client.get_messages(entity, limit = 5)
+            return messages
+        except Exception as e:
+            logging.info(type(e).__name__, 'SendFile')
+        
+        return None

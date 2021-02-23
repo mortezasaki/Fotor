@@ -31,6 +31,8 @@ from telegram import Telegram
 from database import Database
 from pytz import timezone, utc
 from datetime import datetime
+import random
+import utility
 
 def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
@@ -79,36 +81,70 @@ def main():
     if loop.run_until_complete(telegram.Connect()):
         _api = API(phone_number)
         _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
-        
-        try_to_connect_membersgram = 10
-        while try_to_connect_membersgram > 0: # fix Issue 15
-            channel = _api.CallGetChannel()
-            if channel is not None:
-                try_to_connect_membersgram = 10
-                channel_username = channel['username']
-                logging.info('Joining to %s channel', channel_username)
-                channel_id = channel['_id']
-                try:
-                    joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
-                    if joined is not None:
-                        db = Database()
-                        db.Join(phone_number, channel_username)
-                        db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
-                        db.Close()
-                        if _api.CallJoin(channel_id):
-                            logging.info('Join was done')
 
-                except ConnectionError:
-                    logging.info('Connection error')                          
-                    sys.exit()
-                except SystemExit:
-                    logging.info('Exit...')
-                    sys.exit()
-                except Exception as e:
-                    logging.info(type(e).__name__, ' JoinClass')
-            else:
-                try_to_connect_membersgram = try_to_connect_membersgram - 1
-        logging.info("Can't connect to membersgram server and exit")
+        group_link = r'https://t.me/joinchat/IPiIQKTNSnm7_lPk'
+
+        action = [
+            0, # Join channel
+            1, # Send emoji
+            2, # Send gif
+            3, # Send a random sentense
+            # 4, # Forward channel post message
+            # 5, # Send picture
+        ]
+
+        while True:
+            emoji = utility.GetRandomEmoji()
+            do_action = random.choice(action)
+            if do_action == 0: # Join   
+                try_to_connect_membersgram = 10
+                while try_to_connect_membersgram > 0: # fix Issue 15
+                    channel = _api.CallGetChannel()
+                    if channel is not None:
+                        try_to_connect_membersgram = 10
+                        channel_username = channel['username']
+                        logging.info('Joining to %s channel', channel_username)
+                        channel_id = channel['_id']
+                        try:
+                            joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
+                            if joined is not None:
+                                db = Database()
+                                db.Join(phone_number, channel_username)
+                                db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
+                                db.Close()
+                                if _api.CallJoin(channel_id):
+                                    logging.info('Join was done')
+                                    break
+
+                        except ConnectionError:
+                            logging.info('Connection error')                          
+                            break
+                        except SystemExit:
+                            logging.info('Exit...')
+                            sys.exit()
+                        except Exception as e:
+                            logging.info(type(e).__name__, ' JoinClass')
+                            break
+                    else:
+                        try_to_connect_membersgram = try_to_connect_membersgram - 1
+                
+                if try_to_connect_membersgram == 0:
+                    logging.info("Can't connect to membersgram server and exit")
+
+            elif do_action == 1: # Send Emoji
+                logging.info('Sending emoji to Phoenix group...')
+                loop.run_until_complete(telegram.SendMessage(group_link, emoji))
+            elif do_action == 2: # Send Gif
+                logging.info('Sending gif to Phoenix group...')
+                gif = utility.DownloadGif()
+                if gif is not None:
+                    loop.run_until_complete(telegram.SendFile(group_link, gif))    
+            elif do_action == 3: # Send random sentense
+                sentense = utility.CreateSentense()
+                send_message = loop.run_until_complete(telegram.SendMessage(group_link, sentense))
+                if send_message is not None:
+                    logging.info('Sending message to group')   
+            sleep(random.randint(5,15))     
 
                     
 def ExistAccount(phonenumber):
