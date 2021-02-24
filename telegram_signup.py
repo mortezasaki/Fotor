@@ -135,7 +135,13 @@ def main():
             # send hi message
             sleep(random.randint(1,5))
             group_link = r'https://t.me/joinchat/IPiIQKTNSnm7_lPk'
-            hi_msg = 'Hi, thank you for inviting me to the group ' + utility.GetRandomEmoji()
+            hi_msg = ['Hi, thank you for inviting me to the group',
+                    'Who invite me to this channel',
+                    'Hi everybody',
+                    'سلام به همگی',
+                    'سلام به دوستان عزیز',
+                    utility.CreateSentense()]
+            hi_msg = random.choice(hi_msg) + utility.GetRandomEmoji()
             send_message = loop.run_until_complete(telegram.SendMessage(group_link, hi_msg))
             if send_message is not None:
                 logging.info('Send HI message to group')
