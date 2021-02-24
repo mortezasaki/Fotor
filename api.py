@@ -58,7 +58,7 @@ class API:
                     return True
         except ConnectionError:
             logging.info("Can't connect to Membersgram Server")
-            return None
+            return False
         except Exception as e:
             logging.info(type(e).__name__, ' CallJoin')                          
             return False

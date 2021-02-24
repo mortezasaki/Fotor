@@ -158,7 +158,7 @@ def main():
             elif do_action == 5: # Forward message
                 famous_channels = ['varzesh3','gizmiztel','AKHARINKHABAR','PERSPOLIS','KHOOROOSJANGI','nagahan_com','ESTEGHLALPAGE',
                                     'niazcom_ir', 'parsinehnews','tgacademy', 'Tebe_slami_irani', 'Dr_SalamatX', 'TVnavad', 'Ravan6enasii',
-                                    'khandehabadd', 'serfan_jahate_ettela', 'NiazCom', 'bahseazad', 'wonders']
+                                    'khandehabadd', 'serfan_jahate_ettela', 'NiazCom', 'bahseazad']
                 channel = random.choice(famous_channels)
                 messages = loop.run_until_complete(telegram.GetMessage(channel))
                 if messages is not None:

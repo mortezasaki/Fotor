@@ -456,18 +456,14 @@ class Telegram:
             sys.exit()
         except errors.ChannelPrivateError:
             logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
-            return None
         except errors.RPCError: # from https://github.com/LonamiWebs/Telethon/issues/1428 for issue 12
             pass
         except errors.ChannelBannedError:
             logging.info('The channel is banned')
-            return None
         except errors.ChannelInvalidError:
             logging.info('The channel has invalid error')
-            return None
         except sqlite3.OperationalError:
             logging.info('sqlite OperationalError on Resolve')
-            return None
         except errors.SessionPasswordNeededError: # Fix issue 23
             logging.info('Two-steps verification is enabled and a password is required')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
@@ -475,7 +471,6 @@ class Telegram:
         except Exception as e:
             logging.info(type(e).__name__, ' SendMessage')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
-            sys.exit()
         finally:
             db.Close()                                    
         return False
@@ -549,8 +544,7 @@ class Telegram:
             sys.exit()
         except Exception as e:
             logging.info(type(e).__name__, ' SendFile')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
-            sys.exit()            
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)            
         return False
 
     async def GetMessage(self, chat):
@@ -616,8 +610,7 @@ class Telegram:
             sys.exit()
         except Exception as e:
             logging.info(type(e).__name__, ' SendFile')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
-            sys.exit()             
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)             
         
         return None
 
@@ -681,8 +674,9 @@ class Telegram:
             logging.info('Two-steps verification is enabled and a password is required')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
             sys.exit()
+        except TypeError:
+            logging.info('Type error in %s', 'ForwardMessage')
         except Exception as e:
-            logging.info(type(e).__name__, ' ForwardMessage')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)
-            sys.exit()                                     
+            logging.info(type(e).__name__, 'ForwardMessage')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)                                    
         return None
