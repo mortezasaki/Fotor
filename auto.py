@@ -31,7 +31,7 @@ def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    log_file_name = 'logs/join.log'
+    log_file_name = 'logs/auto.log'
 
     logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,
         format = '%(asctime)s - {0} - %(message)s'.format(phone_number), datefmt="%Y-%m-%d %H:%M:%S") 
@@ -166,21 +166,25 @@ def main():
                             opened_account +=1
                             sleep(1)
                     else:
+                        logging.info('Try to create new account...')
                         count_of_signup_process = len(GetSignUpProcess())
-                        if count_of_signup_process > 0 :
-                            continue
-                        if (len(stoped_accounts) + count_of_signup_process) < limit_account and CheckLimitation():
+                        if count_of_signup_process == 0 and CheckLimitation():
+                            logging.info('No limitation for create account')
                             accounts = db.GetAccounts()
-                            if accounts is not None or len(accounts) > 0:
-                                last_account =accounts[-1]
-                                _time = account[6]
-                                try:
+                            try:
+                                if accounts is not None or len(accounts) > 0:
+                                    last_account =accounts[-1]
+                                    _time = last_account[6]
                                     _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
+                                    logging.info('Last account creation time is %s', _time)
                                     mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
+                                    logging.info('Last account acreate at %s minutes ago', mins)
                                     if mins >= 10:
                                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
-                                except:
-                                    pass
+                            except Exception as e:
+                                logging.info(type(e).__name__)
+                        else:
+                            logging.info('please wait 10 min before two account create')
                 else :
                     accounts = db.GetAccounts()
                     mins = 0

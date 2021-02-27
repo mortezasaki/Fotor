@@ -212,7 +212,7 @@ Joins = {7}
                     break
 
             if not started:
-                ps.start(['python', 'auto.py'])
+                ps.start(['python', 'auto.py', '--log', 'debug', '-v'])
                 print('Start automation with account limitation %s' % Config['limit_account'])
 
     @staticmethod
