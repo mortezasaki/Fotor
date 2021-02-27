@@ -16,6 +16,17 @@ import logging
 from pytz import timezone, utc
 import signal
 
+# Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
+def customTime(*args):
+    try:
+        utc_dt = utc.localize(datetime.datetime.utcnow())
+        my_tz = timezone("Asia/Tehran")
+        converted = utc_dt.astimezone(my_tz)
+        return converted.timetuple() 
+    except AttributeError:
+        return None
+
+    
 def LogInit(phone_number):
     # output log on stdout https://stackoverflow.com/a/14058475/9850815
     if not os.path.exists('logs'):
@@ -25,14 +36,7 @@ def LogInit(phone_number):
     logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,
         format = '%(asctime)s - {0} - %(message)s'.format(phone_number), datefmt="%Y-%m-%d %H:%M:%S") 
     
-    logging.Formatter.converter = customTime
-
-# Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
-def customTime(*args):
-    utc_dt = utc.localize(datetime.utcnow())
-    my_tz = timezone("Asia/Tehran")
-    converted = utc_dt.astimezone(my_tz)
-    return converted.timetuple()    
+    logging.Formatter.converter = customTime   
 
 def GetPhoneFromCMDLine(cmdline):
     pattern = r'\d{10,}'
@@ -64,17 +68,20 @@ def CheckLimitation():
     db = Database()
     limit = Config['account_per_day']
     accounts = db.GetAccounts()
-    if not accounts: # Fix issue 21
+    if accounts is None: # Fix issue 21
         logging.info('Cant connect to database be sure that data.db exist or execude `createdb` command')
         sleep(1)
         sys.exit()
     count_of_account_created_today = 0
 
     for account in accounts:
-        _time = account[5]
-        _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
-        if datetime.datetime.today().date() == _time.date():
-            count_of_account_created_today+=1
+        _time = account[6]
+        try:
+            _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
+            if datetime.datetime.today().date() == _time.date():
+                count_of_account_created_today+=1
+        except TypeError:
+            continue
     if count_of_account_created_today < limit:
         return True
     return False
@@ -160,11 +167,31 @@ def main():
                             sleep(1)
                     else:
                         count_of_signup_process = len(GetSignUpProcess())
+                        if count_of_signup_process > 0 :
+                            continue
                         if (len(stoped_accounts) + count_of_signup_process) < limit_account and CheckLimitation():
-                            ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
+                            accounts = db.GetAccounts()
+                            if accounts is not None or len(accounts) > 0:
+                                last_account =accounts[-1]
+                                _time = account[6]
+                                try:
+                                    _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
+                                    mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
+                                    if mins >= 10:
+                                        ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
+                                except:
+                                    pass
                 else :
-                    if CheckLimitation():
-                        ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
+                    accounts = db.GetAccounts()
+                    mins = 0
+                    if accounts is not None or len(accounts) > 0:
+                        last_account =accounts[-1]
+                        _time = account[6]
+                        _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
+                        mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
+
+                    if CheckLimitation() and len(GetSignUpProcess()) == 0 and (mins >= 10 or mins == 0):
+                        ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])                              
 
             except KeyboardInterrupt: # fix issue 19
                 continue
@@ -174,7 +201,7 @@ def main():
                 logging.info(str(e))
 
             db.Close()
-        sleep(30)
+        sleep(3)
 
 def handler(signum, frame):
     print("ctrl+c")

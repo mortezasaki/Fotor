@@ -177,24 +177,29 @@ def DownloadGif():
     if not os.path.exists(r'gifs/'):
         os.mkdir('gifs')
     api = r'https://api.giphy.com/v1/gifs/trending?api_key=XrXXvX8o79fDZRMjFVGOZY7sztx17TYu&limit=25&rating=g'            
-    req = requests.get(api)
-    if req.status_code == 200:
-        data = req.json()
-        selected_gif = random.randint(0,9)       
-        gif_address = data['data'][selected_gif]['images']['original']['url']
-        gif_id = data['data'][selected_gif]['id']
-        save_address = 'gifs/%s.gif' % gif_id
-        if os.path.exists(save_address):
-            return save_address
+    try:
+        req = requests.get(api)
+        if req.status_code == 200:
+            data = req.json()
+            selected_gif = random.randint(0,9)       
+            gif_address = data['data'][selected_gif]['images']['original']['url']
+            gif_id = data['data'][selected_gif]['id']
+            save_address = 'gifs/%s.gif' % gif_id
+            if os.path.exists(save_address):
+                return save_address
 
-        r = requests.get(gif_address, stream=True)
-        if r.status_code == 200:
-            with open(save_address, 'wb') as f:
-                r.raw.decode_content = True
-                shutil.copyfileobj(r.raw, f)
-            return save_address
-    else:
-        gif = os.listdir('gifs/')
-        if len(gif) >0 :
-            return 'gifs/%s' % random.choice(gif)
+            r = requests.get(gif_address, stream=True)
+            if r.status_code == 200:
+                with open(save_address, 'wb') as f:
+                    r.raw.decode_content = True
+                    shutil.copyfileobj(r.raw, f)
+                return save_address
+        else:
+            gif = os.listdir('gifs/')
+            if len(gif) >0 :
+                return 'gifs/%s' % random.choice(gif)    
+    except ConnectionError:
+        return None
+    except Exception as e:
+        return None
     return None

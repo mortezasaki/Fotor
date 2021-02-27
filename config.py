@@ -9,6 +9,6 @@ Config = {
     "app_version" : "1.0.0",
     "flood_sleep_threshold" : 60 * 60 * 12,
     "SMS_Activate_API" : '376c29Ace3AA9A9f252d2c76c632f0bd',
-    "limit_account" : 5,
-    "account_per_day" : 30,
+    "limit_account" : 3,
+    "account_per_day" : 5,
 }
