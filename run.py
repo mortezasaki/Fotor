@@ -51,7 +51,7 @@ class FotorShell(cmd.Cmd):
     def do_list(arg):
         'List of all running accounts'
         print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
-        print('=' * 80)
+        print('=' * 100)
 
 
         showed = [] # a list that uses for which account type was showed
@@ -269,6 +269,24 @@ Joins = {7}
             print("Use this value => phonenumber country firstname family gender status")
 
     @staticmethod
+    def do_next(args):
+        'While untile create next account'
+        if len(GetSignUpProcess()) > 0:
+            print('Creating an account...')
+        else:
+            db = Database()
+            accounts = db.GetAccounts()
+            db.Close()
+            mins = 0
+            if accounts is not None or len(accounts) > 0:
+                last_account = accounts[-1]
+                _time = last_account[6]
+                _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
+                mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
+                print(10 - mins)
+
+
+    @staticmethod
     def do_banner(arg):
         print(banner)
 
@@ -321,6 +339,22 @@ def GetListOfAllProccess():
             accounts.append(process)
     
     return accounts
+
+def GetSignUpProcess():
+    process = []
+    try:
+        for p in psutil.process_iter():
+            try:
+                cmdline = ' '.join(p.cmdline())
+                pattern = r'\d{10,}'
+                if 'telegram_signup.py' in cmdline:
+                    process.append(p)
+            except psutil.NoSuchProcess:
+                continue
+    except KeyboardInterrupt: # Fix issue 11
+        pass
+    
+    return process   
 
 
 
