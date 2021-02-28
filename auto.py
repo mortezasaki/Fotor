@@ -189,8 +189,8 @@ def main():
                     accounts = db.GetAccounts()
                     mins = 0
                     if accounts is not None or len(accounts) > 0:
-                        last_account =accounts[-1]
-                        _time = account[6]
+                        last_account = accounts[-1]
+                        _time = last_account[6]
                         _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
                         mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
 
