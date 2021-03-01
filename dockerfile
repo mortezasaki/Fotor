@@ -4,6 +4,10 @@ FROM python:3.9
 # set the working directory in the container
 WORKDIR /fotor
 
+# Download sentenses
+ADD https://downloads.tatoeba.org/exports/sentences.tar.bz2 .
+RUN tar xf sentences.tar.bz2
+
 # copy the dependencies file to the working directory
 COPY requirements.txt .
 
