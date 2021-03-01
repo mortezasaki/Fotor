@@ -283,7 +283,7 @@ Joins = {7}
                 _time = last_account[6]
                 _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
                 mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
-                print(10 - mins)
+                print(10 - mins, 'Mins')
 
 
     @staticmethod

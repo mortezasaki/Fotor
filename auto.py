@@ -113,6 +113,7 @@ def main():
             db = Database()
             try:
                 for file in os.listdir(Config['account_path']):
+                    logging.info('Get config files...')
                     # fix load account for join when sign up not complated
                     try:
                         file_name = '%s%s' %(Config['account_path'], file)
@@ -133,9 +134,10 @@ def main():
                         continue
                 
                 stoped_accounts = []
-                
-                if len(accounts) > 0:
+                logging.info('Get ready accounts...')
+                if accounts is not None and len(accounts) > 0:
                     for account in accounts:
+                        logging.info('Loop in accounts')
                         status = account['Status']
                         showed = [TelegramRegisterStats.Ban.value, TelegramRegisterStats.AuthProblem.value,
                                     TelegramRegisterStats.HasPassword.value, TelegramRegisterStats.ToMany.value]
@@ -143,7 +145,8 @@ def main():
                         if int(status ) not in showed and account['Phone'] not in process:
                             if int(status) == TelegramRegisterStats.FloodWait.value:
                                 flood = db.GetFloodWait(account['Phone'])
-                                if len(flood) == 2:
+                                logging.info('Check that account not  floodwait')
+                                if flood is not None and len(flood) == 2:
                                     try:
                                         _time = datetime.datetime.strptime(flood[0], '%Y-%m-%d %H:%M:%S.%f')
                                         seconds = flood[1]
@@ -158,6 +161,7 @@ def main():
                                 stoped_accounts.append(account['Phone'])
                 
                     if len(stoped_accounts)>0:
+                        logging.info('Create new account')
                         opened_account = 0 # وقتی در اولین شروع هیچ اکانتی لود نشده با این حلفه به اندازه محدوده اکانتها اگر اکانتی وجود داشته باشد لود میشود
                         while len(process) + opened_account < limit_account and len(stoped_accounts) > 0:
                             random_selected_account = random.choice(stoped_accounts)
@@ -179,22 +183,24 @@ def main():
                                     logging.info('Last account creation time is %s', _time)
                                     mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
                                     logging.info('Last account acreate at %s minutes ago', mins)
-                                    if mins >= 10:
+                                    if mins >= random.randint(5,10):
                                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
                             except Exception as e:
                                 logging.info(type(e).__name__)
                         else:
                             logging.info('please wait 10 min before two account create')
                 else :
+                    logging.info('Try to create account...')
                     accounts = db.GetAccounts()
                     mins = 0
-                    if accounts is not None or len(accounts) > 0:
+                    if accounts is not None and len(accounts) > 0:
+                        logging.info('Check last account creation time...')
                         last_account = accounts[-1]
                         _time = last_account[6]
                         _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
                         mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
 
-                    if CheckLimitation() and len(GetSignUpProcess()) == 0 and (mins >= 10 or mins == 0):
+                    if CheckLimitation() and len(GetSignUpProcess()) == 0 and (mins >= random.randint(5,10) or mins == 0):
                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])                              
 
             except KeyboardInterrupt: # fix issue 19

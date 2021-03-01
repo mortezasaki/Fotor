@@ -177,12 +177,12 @@ class Database:
             status = self.conn.execute(command, t)
             return status.fetchone()
         except TypeError:
-            return 0
+            return []
         except sqlite3.OperationalError:
-            return 0            
+            return []            
         except Exception as e:
             logging.info(type(e).__name__)
-            return 0
+            return []
 
     def DeleteAccount(self, phonenumber):
         command = 'Delete from account where phonenumber = ?'

@@ -43,7 +43,8 @@ class Telegram:
         try:
             await self.tg_client.sign_up(activation_code, name, family)
             return True
-        except:
+        except Exception as e:
+            logging.info(type(e).__name__, 'telegram SignUp')
             return False
 
     async def Connect(self, use_proxy = False, login = True):

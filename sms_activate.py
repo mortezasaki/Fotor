@@ -74,6 +74,10 @@ class SMSActivate:
 
     def GetNumber(self, country_code, service= 'tg', retry : int = 5, wait : float = 3):
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getNumber&service={1}&country={2}'.format(self.api_key, service, country_code)
+        # Fix bug 34
+        bad_phonenumber =[
+            '6283'
+        ]
         for i in range(retry):
             req = requests.get(url)        
 
@@ -84,7 +88,14 @@ class SMSActivate:
                     if re.match(pattern, response):
                         status_code = response.split(':')[1]
                         phone_number = response.split(':')[2]
-                        return {'Status' : status_code, 'Phone' : phone_number}
+                        # Fix bug 34
+                        bad_phone = False
+                        for phone in bad_phonenumber:
+                            if phone_number.startswith(phone):
+                                sleep(wait)
+                                bad_phone = True
+                        if not bad_phone:
+                            return {'Status' : status_code, 'Phone' : phone_number}
                 except:
                     return None
             sleep(wait)
