@@ -64,7 +64,7 @@ def main():
             continue
         logging.info('Country {0}, Cost {1}'.format(country_code, cost))
         if cost <= balance:
-            phone_number = sms_activate.GetNumber(country_code)
+            phone_number = sms_activate.GetNumber(country_code, retry = 3, wait = 5) # Change for mitigate banned by sms-activate
             if phone_number is not None:
                 status = phone_number['Status']
                 phone_number = phone_number['Phone']

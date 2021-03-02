@@ -15,9 +15,29 @@ from enums import *
 from database import Database
 import sqlite3
 import random
+from pytz import timezone, utc
+from datetime import datetime
+
+def LogInit():
+    # output log on stdout https://stackoverflow.com/a/14058475/9850815
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    log_file_name = 'logs/telegram.log'
+
+    logging.basicConfig(filename=log_file_name, filemode="a", level=logging.INFO,format = '%(asctime)s - %(message)s') 
+
+    logging.Formatter.converter = customTime
+
+# Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
+def customTime(*args):
+    utc_dt = utc.localize(datetime.utcnow())
+    my_tz = timezone("Asia/Tehran")
+    converted = utc_dt.astimezone(my_tz)
+    return converted.timetuple()
 
 class Telegram:
     def __init__(self, phone_number):
+        LogInit()
         self.phone_number = phone_number
         if not os.path.exists(Config['account_path']):
             os.makedirs(Config['account_path'])

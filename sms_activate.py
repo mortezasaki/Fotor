@@ -96,7 +96,10 @@ class SMSActivate:
                                 bad_phone = True
                         if not bad_phone:
                             return {'Status' : status_code, 'Phone' : phone_number}
-                except:
+                    elif 'BANNED' in response:
+                        sleep(60)
+                except Exception as e:
+                    logging.info(type(e).__name__)
                     return None
             sleep(wait)
         return None

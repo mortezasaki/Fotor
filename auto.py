@@ -183,7 +183,7 @@ def main():
                                     logging.info('Last account creation time is %s', _time)
                                     mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
                                     logging.info('Last account acreate at %s minutes ago', mins)
-                                    if mins >= random.randint(5,10):
+                                    if mins >= random.randint(10,20):
                                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])
                             except Exception as e:
                                 logging.info(type(e).__name__)
@@ -193,14 +193,14 @@ def main():
                     logging.info('Try to create account...')
                     accounts = db.GetAccounts()
                     mins = 0
-                    if accounts is not None and len(accounts) > 0:
+                    if accounts is not None or len(accounts) > 0:
                         logging.info('Check last account creation time...')
                         last_account = accounts[-1]
                         _time = last_account[6]
                         _time = datetime.datetime.strptime(_time, '%Y-%m-%d %H:%M:%S.%f')
                         mins = (datetime.datetime.now() - _time).total_seconds() / 60.0 # Create new account each 10 miniuts
 
-                    if CheckLimitation() and len(GetSignUpProcess()) == 0 and (mins >= random.randint(5,10) or mins == 0):
+                    if CheckLimitation() and len(GetSignUpProcess()) == 0 and (mins >= random.randint(10,20) or mins == 0):
                         ps.start(['python', 'telegram_signup.py', '--log' ,'debug', '-v'])                              
 
             except KeyboardInterrupt: # fix issue 19
