@@ -76,7 +76,9 @@ class SMSActivate:
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getNumber&service={1}&country={2}'.format(self.api_key, service, country_code)
         # Fix bug 34
         bad_phonenumber =[
-            '6283'
+            '6283',
+            '8487',
+            '845'
         ]
         for i in range(retry):
             req = requests.get(url)        
