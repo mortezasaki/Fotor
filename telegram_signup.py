@@ -64,7 +64,7 @@ def main():
             continue
         logging.info('Country {0}, Cost {1}'.format(country_code, cost))
         if cost <= balance:
-            phone_number = sms_activate.GetNumber(country_code, retry = 3, wait = 5) # Change for mitigate banned by sms-activate
+            phone_number = sms_activate.GetNumber(country_code, retry = 3, wait = 10) # Change for mitigate banned by sms-activate
             if phone_number is not None:
                 status = phone_number['Status']
                 phone_number = phone_number['Phone']
@@ -75,11 +75,12 @@ def main():
                     logging.info('The activation code telegram was sent')
                     logging.info('Wait for activation code...')
                     try:
-                        activation_code = sms_activate.GetActivationCode(status, wait = 8)
+                        activation_code = sms_activate.GetActivationCode(status, wait = 15)
                         if activation_code is not None:
                             logging.info('Activation code is: %s', activation_code)
                             break
-                    except:
+                    except Exception as e:
+                        logging.info(type(e).__name__, 'in sms_activate.GetActivationCode')
                         sms_activate.CancelCode(status)
 
         else:
@@ -158,6 +159,7 @@ def main():
         else:
             logging.info('Problem in sign up for %s', phone_number)
             sms_activate.CancelCode(status)
+            db.NewIssue(phone_number, PhoneIssue.BanWhenSignUp.value)
             DeleteSession(phone_number)
 
 

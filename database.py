@@ -21,7 +21,7 @@ class Database:
     def Create(self):
         c = self.conn.cursor()
 
-        # Create table
+        # Create account table
         c.execute('''CREATE TABLE account
                     (phonenumber text PRIMARY KEY,
                     username text,
@@ -35,6 +35,7 @@ class Database:
                     flood_wait_seconds integer)
                     ''')
         
+        # Create joins table
         c.execute('''CREATE TABLE joins
                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
                     phonenumber text,
@@ -43,6 +44,13 @@ class Database:
                     FOREIGN KEY(phonenumber) REFERENCES account(phonenumber))
                     ''')
 
+        # Create phone_issue table
+        c.execute('''CREATE TABLE issues
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    pattern INTEGER,
+                    reason INTEGER,
+                    ban_date text)
+                ''')
 
         # Save (commit) the changes
         self.conn.commit()
@@ -100,6 +108,27 @@ class Database:
     #         # Just be sure any changes have been committed or they will be lost.
     #         self.conn.close()
 
+    def NewIssue(self, phonenumber, reason):
+        try:
+            pattern = int(phonenumber[:4])
+            c = self.conn.cursor()
+            command = "INSERT INTO issues (pattern, reason, ban_date) VALUES ('%s','%s','%s')" % (pattern, reason, datetime.datetime.now())
+            c.execute(command)
+            
+            # Save (commit) the changes
+            self.conn.commit()
+
+            # We can also close the connection if we are done with it.
+            # Just be sure any changes have been committed or they will be lost.
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        except sqlite3.OperationalError:
+            return False
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return False
+
     def CountOfJoins(self, phonenumber):
         if utility.ValidatePhone(phonenumber):
             try:
@@ -147,6 +176,16 @@ class Database:
             return username
         except sqlite3.OperationalError:
             return None                        
+        except Exception as e:
+            logging.info(type(e).__name__)
+            return None
+
+    def GetIssues(self):
+        try:
+            command = 'Select * from issues'
+            return self.conn.execute(command).fetchall()
+        except sqlite3.OperationalError:
+            return None
         except Exception as e:
             logging.info(type(e).__name__)
             return None

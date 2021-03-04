@@ -50,7 +50,7 @@ class FotorShell(cmd.Cmd):
     @staticmethod
     def do_list(arg):
         'List of all running accounts'
-        print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloowWait":<20}')
+        print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloodwWait":<20}')
         print('=' * 100)
 
 
@@ -267,6 +267,42 @@ Joins = {7}
             db.Close()
         else:
             print("Use this value => phonenumber country firstname family gender status")
+
+    @staticmethod
+    def do_new_issue(args):
+        'Create new issue.\n0: Ban when register\n1: Ban when joining.\n2: Already registred.'
+        try:
+            issue = args.split()
+            if len(issue) == 2:
+                phonenumber = issue[0]
+                reason = int(issue[1])
+                if reason in (0,1,2):
+                    db = Database()
+                    result = db.NewIssue(phonenumber, reason)
+                    db.Close()
+                    if result:
+                        print("Submit new issue")
+                else:
+                    print('0: Ban when register\n1: Ban when joining.\n2: Already registred.')
+            else:
+                print('new_issue phonenumber reason-Code')
+        except Exception as e:
+            print(type(e).__name__)
+
+    @staticmethod
+    def do_get_issue(args):
+        'Get All issues'
+        print(f'{"ID":<10}', f'{"Pattern":<20}', f'{"Reason":<20}', f'{"Date":<20}')
+        print('=' * 80)
+        try:
+            db = Database()
+            issues = db.GetIssues()
+            db.Close()
+            if len(issues) > 0:
+                for i in issues:
+                    print(f'{i[0]:<10}', f'{i[1]:<20}', f'{i[2]:<20}', f'{i[3]:<20}')
+        except Exception as e:
+            print(type(e).__name__)
 
     @staticmethod
     def do_next(args):

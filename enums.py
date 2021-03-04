@@ -24,3 +24,8 @@ class SMSActivateSMSStatus(enum.Enum):
     AnotherCode = 3
     Complate = 6
     Cancel = 8
+
+class PhoneIssue(enum.Enum):
+    BanWhenSignUp = 0
+    BanWhenJoining = 1
+    AlreadyRegistered = 2

@@ -63,6 +63,9 @@ class Telegram:
         try:
             await self.tg_client.sign_up(activation_code, name, family)
             return True
+        except errors.SessionPasswordNeededError:
+            logging.info('Two-steps verification is enabled and a password is required.')
+            return False
         except Exception as e:
             logging.info(type(e).__name__, 'telegram SignUp')
             return False
@@ -100,14 +103,19 @@ class Telegram:
         else:
             try:
                 self.tg_client = TelegramClient(tg_session_location, Config['tg_api_id'], Config['tg_api_hash'],
-                    device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.1')  
+                    device_model = 'Galaxy J5 Prime' , system_version = 'SM-G570F', app_version = '1.0.2')  
             except TypeError:
+                logging.info('Type error in telegram connect')
                 os.remove(tg_session_location)                
                 sys.exit()
             except SystemExit():
                 sys.exit()
+            except Exception as e:
+                logging.info(type(e).__name__, ' Connect')
+                sys.exit()
         
         try:
+            logging.info('Try to connect telegram...')
             await self.tg_client.connect()
             if self.tg_client.is_connected() :
                 return True
@@ -136,6 +144,7 @@ class Telegram:
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+                db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
                 sys.exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
@@ -144,6 +153,7 @@ class Telegram:
             except errors.SessionPasswordNeededError: # TODO: Handle when account has password
                 logging.info('Account has password')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+                db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
                 sys.exit()
             except errors.ChannelsTooMuchError:
                 logging.info('You have joined too many channels/supergroups.')
@@ -163,6 +173,7 @@ class Telegram:
             except errors.SessionPasswordNeededError: # Fix issue 23
                 logging.info('Two-steps verification is enabled and a password is required')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+                db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
                 sys.exit()                
             except sqlite3.OperationalError:
                 logging.info('sqlite OperationalError on Resolve')
@@ -193,16 +204,12 @@ class Telegram:
             except errors.UserDeactivatedBanError:
                 logging.info('The user has been banned')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+                db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
                 sys.exit()
             except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
                 logging.info('Account has auth problem')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
                 os.remove('{0}{1}.session'.format(Config['account_path'], self.phone_number))
-                sys.exit()
-
-            except errors.SessionPasswordNeededError: # TODO: Handle when account has password
-                logging.info('Account has password')
-                db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
                 sys.exit()
             except errors.ChannelsTooMuchError:
                 logging.info('You have joined too many channels/supergroups.')
@@ -225,6 +232,7 @@ class Telegram:
             except errors.SessionPasswordNeededError: # Fix issue 23
                 logging.info('Two-steps verification is enabled and a password is required')
                 db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+                db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
                 sys.exit()
             except Exception as e:
                 logging.info(type(e).__name__, ' JoinChannel')
@@ -251,6 +259,7 @@ class Telegram:
         except errors.SessionPasswordNeededError:
             logging.info('Two-steps verification is enabled and a password is required.')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.UsernameInvalidError:
             logging.info('Nobody is using this username, or the username is unacceptable. If the latter, it must match r"[a-zA-Z][\w\d]{3,30}[a-zA-Z\d]".')
@@ -265,6 +274,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()
         except errors.AuthKeyUnregisteredError:
             logging.info('AuthKeyUnregisteredError')
@@ -290,7 +300,8 @@ class Telegram:
             return None
         except errors.SessionPasswordNeededError: # Fix issue 23
             logging.info('Two-steps verification is enabled and a password is required')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()            
         except Exception as e:
             logging.info(type(e).__name__, ' Resolve')
@@ -327,6 +338,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('The user has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()
         except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
             logging.info('Account has auth problem')
@@ -336,6 +348,7 @@ class Telegram:
         except errors.SessionPasswordNeededError: # TODO: Handle when account has password
             logging.info('Account has password')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.ChannelsTooMuchError:
             logging.info('You have joined too many channels/supergroups.')
@@ -445,6 +458,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()            
         except ValueError:
             logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
@@ -458,10 +472,6 @@ class Telegram:
             db.UpdateFlooWait(self.phone_number, e.seconds)
             await self.tg_client.disconnect()
             sys.exit()
-        except errors.UserDeactivatedBanError:
-            logging.info('The user has been banned')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()
         except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
             logging.info('Account has auth problem')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
@@ -470,6 +480,7 @@ class Telegram:
         except errors.SessionPasswordNeededError: # TODO: Handle when account has password
             logging.info('Account has password')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.ChannelsTooMuchError:
             logging.info('You have joined too many channels/supergroups.')
@@ -515,6 +526,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()                  
         except ValueError:
             logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
@@ -528,10 +540,6 @@ class Telegram:
             db.UpdateFlooWait(self.phone_number, e.seconds)
             await self.tg_client.disconnect()
             sys.exit()
-        except errors.UserDeactivatedBanError:
-            logging.info('The user has been banned')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()
         except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
             logging.info('Account has auth problem')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
@@ -540,6 +548,7 @@ class Telegram:
         except errors.SessionPasswordNeededError: # TODO: Handle when account has password
             logging.info('Account has password')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.ChannelsTooMuchError:
             logging.info('You have joined too many channels/supergroups.')
@@ -578,10 +587,6 @@ class Telegram:
             logging.info('User has been deactivate')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
             sys.exit()
-        except errors.UserDeactivatedBanError:
-            logging.info('User has been banned')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()
         except ValueError:
             logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
             group_hash = r'IPiIQKTNSnm7_lPk'
@@ -597,6 +602,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('The user has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()
         except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
             logging.info('Account has auth problem')
@@ -606,6 +612,7 @@ class Telegram:
         except errors.SessionPasswordNeededError: # TODO: Handle when account has password
             logging.info('Account has password')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.ChannelsTooMuchError:
             logging.info('You have joined too many channels/supergroups.')
@@ -647,6 +654,7 @@ class Telegram:
         except errors.UserDeactivatedBanError:
             logging.info('User has been banned')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
             sys.exit()
         except ValueError:
             logging.info('Cannot get entity from a channel (or group) that you are not part of. Join the group and retry')
@@ -660,10 +668,6 @@ class Telegram:
             db.UpdateFlooWait(self.phone_number, e.seconds)
             await self.tg_client.disconnect()
             sys.exit()
-        except errors.UserDeactivatedBanError:
-            logging.info('The user has been banned')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
-            sys.exit()
         except errors.AuthKeyUnregisteredError: # this error accurrd when sing up another system and try login from this system
             logging.info('Account has auth problem')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.AuthProblem.value)
@@ -672,6 +676,7 @@ class Telegram:
         except errors.SessionPasswordNeededError: # TODO: Handle when account has password
             logging.info('Account has password')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)
+            db.NewIssue(self.phone_number, PhoneIssue.AlreadyRegistered.value)
             sys.exit()
         except errors.ChannelsTooMuchError:
             logging.info('You have joined too many channels/supergroups.')
