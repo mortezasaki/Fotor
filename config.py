@@ -11,5 +11,6 @@ Config = {
     "SMS_Activate_API" : '376c29Ace3AA9A9f252d2c76c632f0bd',
     "limit_account" : 3,
     "account_per_day" : 5,
-    "signup_error_limitation" : 10,
+    "signup_error_limitation" : 5,
+    "ban_limitation" : 5,
 }

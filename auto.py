@@ -115,7 +115,13 @@ def main():
     pickle.dump(conf, fc)
     fc.close()
 
-    while signup_error < Config['signup_error_limitation']:
+    # Fix issue 37
+    db = Database()
+    bans = db.Count('Select * from account where status = ?', (TelegramRegisterStats.Ban.value,))
+    db.Close()
+    first_run = True
+    while signup_error < Config['signup_error_limitation'] and ((bans % Config['ban_limitation']) < Config['ban_limitation'] or first_run):
+        first_run = False
         process = GetJoinProcess()
         if len(process) < limit_account:
             accounts = []
@@ -221,10 +227,18 @@ def main():
 
             db.Close()
         sleep(3)
+        # Fix issue 36
         fc = open('conf.pkl', 'rb')
         conf = pickle.load(fc)
         fc.close()
         signup_error = conf['signup_error']
+
+        # Fix issue 37
+        db = Database()
+        bans = db.Count('Select * from account where status = ?', (TelegramRegisterStats.Ban.value,))
+        db.Close()
+    else:
+        logging.info('Exceeded the limit of deleting or deleting accounts. Check logs.')
 
 def handler(signum, frame):
     print("ctrl+c")
