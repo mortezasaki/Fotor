@@ -16,6 +16,7 @@ import logging
 from pytz import timezone, utc
 import signal
 import pickle
+import requests
 
 
 # Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
@@ -237,6 +238,23 @@ def main():
         db = Database()
         bans = db.Count('Select * from account where status = ?', (TelegramRegisterStats.Ban.value,))
         db.Close()
+
+        # Fix issue 38
+        # Kill switch
+        try:
+            req = requests.get('https://ifconfig.me')
+            if req.status_code == 200:
+                ip = req.text
+                if ip == Config['server_ip']:
+                    logging.info('Problem connecting to the VPN')
+                    sys.exit()
+        except SystemExit:
+            sys.exit()
+        except Exception as e:
+            logging.info(type(e).__name__)
+
+        
+
     else:
         logging.info('Exceeded the limit of deleting or deleting accounts. Check logs.')
 
@@ -248,5 +266,7 @@ if __name__ == '__main__' :
         LogInit('Auto.py')
         signal.signal(signal.SIGINT, handler)  # prevent "crashing" with ctrl+C https://stackoverflow.com/a/59003480/9850815
         main()
+    except SystemExit:
+        sys.exit()
     except Exception as e:
         logging.info(str(e))

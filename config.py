@@ -13,4 +13,5 @@ Config = {
     "account_per_day" : 5,
     "signup_error_limitation" : 5,
     "ban_limitation" : 5,
+    "server_ip" : '104.244.208.207',
 }
