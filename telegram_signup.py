@@ -17,6 +17,7 @@ import random
 import re
 import requests
 import shutil
+import pickle
 
 
 def GenerateUserName(name, family):
@@ -161,7 +162,22 @@ def main():
             sms_activate.CancelCode(status)
             db.NewIssue(phone_number, PhoneIssue.BanWhenSignUp.value)
             DeleteSession(phone_number)
-
+            # For issue 36
+    if os.path.exists('conf.pkl'):
+        fc = open('conf.pkl', 'rb')
+        pkl = pickle.load(fc)
+        fc.close()
+        signup_error = pkl['signup_error']
+        signup_error+=1
+        conf = {'signup_error' : signup_error}
+        fc = open('conf.pkl', 'wb')
+        pickle.dump(conf, fc)
+        fc.close()
+    else:
+        fc = open('conf.pkl', 'wb')
+        conf = {'signup_error' : 0}
+        pickle.dump(conf, fc)
+        fc.close()
 
 def DeleteSession(phonenumber):
     file = '{0}{1}.session'.format(Config['account_path'], phonenumber)

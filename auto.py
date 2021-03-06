@@ -15,6 +15,8 @@ import datetime
 import logging
 from pytz import timezone, utc
 import signal
+import pickle
+
 
 # Use custom timezone in logging https://stackoverflow.com/a/45805464/9850815
 def customTime(*args):
@@ -106,7 +108,14 @@ def main():
     if not os.path.exists(Config['account_path']):
         os.mkdir(Config['account_path'])
     limit_account = Config['limit_account']
-    while True:
+    # For issue 36
+    signup_error = 0
+    conf = {"signup_error" : signup_error}
+    fc = open('conf.pkl', 'wb')
+    pickle.dump(conf, fc)
+    fc.close()
+
+    while signup_error < Config['signup_error_limitation']:
         process = GetJoinProcess()
         if len(process) < limit_account:
             accounts = []
@@ -193,7 +202,7 @@ def main():
                     logging.info('Try to create account...')
                     accounts = db.GetAccounts()
                     mins = 0
-                    if accounts is not None or len(accounts) > 0:
+                    if accounts is not None and len(accounts) > 0:
                         logging.info('Check last account creation time...')
                         last_account = accounts[-1]
                         _time = last_account[6]
@@ -212,6 +221,10 @@ def main():
 
             db.Close()
         sleep(3)
+        fc = open('conf.pkl', 'rb')
+        conf = pickle.load(fc)
+        fc.close()
+        signup_error = conf['signup_error']
 
 def handler(signum, frame):
     print("ctrl+c")
