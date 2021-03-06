@@ -241,17 +241,18 @@ def main():
 
         # Fix issue 38
         # Kill switch
-        try:
-            req = requests.get('https://ifconfig.me')
-            if req.status_code == 200:
-                ip = req.text
-                if ip == Config['server_ip']:
-                    logging.info('Problem connecting to the VPN')
-                    sys.exit()
-        except SystemExit:
-            sys.exit()
-        except Exception as e:
-            logging.info(type(e).__name__)
+        while True:
+            try:
+                req = requests.get('https://ifconfig.me')
+                if req.status_code == 200:
+                    ip = req.text
+                    if ip == Config['server_ip']:
+                        logging.info('Problem connecting to the VPN')
+                        sleep(10)
+                    else:
+                        break
+            except Exception as e:
+                logging.info(type(e).__name__)
 
         
 
