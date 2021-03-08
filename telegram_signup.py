@@ -159,9 +159,11 @@ def main():
 
         else:
             logging.info('Problem in sign up for %s', phone_number)
-            sms_activate.CancelCode(status)
+            db = Database()
             db.NewIssue(phone_number, PhoneIssue.BanWhenSignUp.value)
-            DeleteSession(phone_number)
+            db.Close()
+            DeleteSession(phone_number)            
+            sms_activate.CancelCode(status)
             # For issue 36
     if os.path.exists('conf.pkl'):
         fc = open('conf.pkl', 'rb')

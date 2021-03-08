@@ -246,9 +246,9 @@ def main():
                 req = requests.get('https://ifconfig.me')
                 if req.status_code == 200:
                     ip = req.text
-                    if ip == Config['server_ip']:
+                    if ip == Config['server_ip']: # VPN not connected
                         logging.info('Problem connecting to the VPN')
-                        sleep(10)
+                        sleep(20)
                     else:
                         break
             except Exception as e:
