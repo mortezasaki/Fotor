@@ -41,6 +41,26 @@ def GenerateProfilePicture(filename):
             return img_address
     return None
 
+
+def CheckVPN(retry = 60, wait = 10):
+    logging.info('Check VPN...')
+    get_vpn_retry = retry
+    while get_vpn_retry > 0:
+        try:
+            req = requests.get('https://ifconfig.me')
+            if req.status_code == 200:
+                ip = req.text
+                if ip == Config['server_ip']: # VPN not connected
+                    logging.info('Problem connecting to the VPN')
+                    sleep(wait)
+                else:
+                    logging.info('VPN is OK!')
+                    return True
+        except Exception as e:
+            logging.info(type(e).__name__)
+        get_vpn_retry-=1
+    return False
+
 def main():
     LogInit()
     logging.info("Register new number...")
@@ -72,6 +92,11 @@ def main():
                 logging.info('Status: {0}, Phone Number: {1}'.format(status, phone_number))
                 logging.info('Start Telethon...')
                 telegram = Telegram(phone_number)
+                # Kill switch
+                # Telegram be bazi az ip ha hasase . bayad ta vaghti be ye vpn vasl nashodim nazarim be telegram vasl beshe
+                if not CheckVPN():
+                    logging.info('Fail to connect VPN. Exit...')
+                    sys.exit()
                 if loop.run_until_complete(telegram.Connect(login = False)) and loop.run_until_complete(telegram.SendCode()):
                     logging.info('The activation code telegram was sent')
                     logging.info('Wait for activation code...')
@@ -104,6 +129,9 @@ def main():
         logging.info('New user name = {0} {1}'.format(name, family))
 
         logging.info('Sign Up in Telegram...')
+        if not CheckVPN():
+            logging.info('Fail to connect VPN. Exit...')
+            sys.exit()
         is_signup = loop.run_until_complete(telegram.SignUp(activation_code, name, family))
         if is_signup:
             username = GenerateUserName(name, family)
