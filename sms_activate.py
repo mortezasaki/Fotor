@@ -76,34 +76,35 @@ class SMSActivate:
     def GetNumber(self, country_code, service= 'tg', retry : int = 5, wait : float = 3):
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getNumber&service={1}&country={2}'.format(self.api_key, service, country_code)
         # Fix bug 34
-
         db = Database()
         issues = db.GetIssues()
         db.Close()
         for i in range(retry):
-            req = requests.get(url)        
+            try:
+                req = requests.get(url)        
 
-            if req.status_code == 200:
-                try:
-                    response = req.text
-                    pattern = r'^(ACCESS_NUMBER:)\d{8,}(:)\d{8,}$'
-                    if re.match(pattern, response):
-                        status_code = response.split(':')[1]
-                        phone_number = response.split(':')[2]
-                        # Fix bug 34
-                        bad_phone = False
-                        for phone in issues:
-                            if phone_number.startswith(str(phone[1])):
-                                sleep(wait)
-                                bad_phone = True
-                        if not bad_phone:
-                            return {'Status' : status_code, 'Phone' : phone_number}
-                    elif 'BANNED' in response:
-                        sleep(60)
-                except Exception as e:
-                    logging.info(type(e).__name__)
-                    return None
-            sleep(wait)
+                if req.status_code == 200:
+                        response = req.text
+                        pattern = r'^(ACCESS_NUMBER:)\d{8,}(:)\d{8,}$'
+                        if re.match(pattern, response):
+                            status_code = response.split(':')[1]
+                            phone_number = response.split(':')[2]
+                            # Fix bug 34
+                            bad_phone = False
+                            for phone in issues:
+                                if phone_number.startswith(str(phone[1])):
+                                    sleep(wait)
+                                    bad_phone = True
+                            if not bad_phone:
+                                return {'Status' : status_code, 'Phone' : phone_number}
+                        elif 'BANNED' in response:
+                            sleep(60)
+                sleep(wait)
+            except KeyboardInterrupt:
+                pass
+            except Exception as e:
+                logging.info(type(e).__name__)
+                return None
         return None
 
     def ChangeNumberStatus(self,id, status):
