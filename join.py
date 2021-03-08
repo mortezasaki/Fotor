@@ -52,6 +52,25 @@ def customTime(*args):
     converted = utc_dt.astimezone(my_tz)
     return converted.timetuple()
 
+def CheckVPN(retry = 60, wait = 10):
+    logging.info('Check VPN...')
+    get_vpn_retry = retry
+    while get_vpn_retry > 0:
+        try:
+            req = requests.get('https://ifconfig.me')
+            if req.status_code == 200:
+                ip = req.text
+                if ip == Config['server_ip']: # VPN not connected
+                    logging.info('Problem connecting to the VPN')
+                    sleep(wait)
+                else:
+                    logging.info('VPN is OK!')
+                    return True
+        except Exception as e:
+            logging.info(type(e).__name__)
+        get_vpn_retry-=1
+    return False
+
 def main():
     argv = sys.argv[1:] 
     loop = asyncio.get_event_loop()
@@ -78,6 +97,9 @@ def main():
         sys.exit()
 
     telegram = Telegram(phone_number)
+    if not CheckVPN():
+        logging.info('Fail to connect VPN. Exit...')
+        sys.exit()
     if loop.run_until_complete(telegram.Connect()):
         _api = API(phone_number)
         _api.CallRegisterAPI("test", "test" ,Gender.Man.value,'Russia',status =TelegramRegisterStats.Succesfull.value) # Todo: create a api to check number exist in db
@@ -110,6 +132,9 @@ def main():
                         logging.info('Joining to %s channel', channel_username)
                         channel_id = channel['_id']
                         try:
+                                if not CheckVPN():
+                                    logging.info('Fail to connect VPN. Exit...')
+                                    sys.exit()
                             joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
                             if joined is not None:
                                 db.Join(phone_number, channel_username)
@@ -134,24 +159,39 @@ def main():
 
             elif do_action == 1: # Send Emoji
                 logging.info('Sending emoji to Phoenix group...')
+                    if not CheckVPN():
+                        logging.info('Fail to connect VPN. Exit...')
+                        sys.exit()
                 loop.run_until_complete(telegram.SendMessage(group_link, emoji))
             elif do_action == 2: # Send Gif
                 logging.info('Sending gif to Phoenix group...')
                 gif = utility.DownloadGif()
                 if gif is not None:
+                        if not CheckVPN():
+                            logging.info('Fail to connect VPN. Exit...')
+                            sys.exit()
                     loop.run_until_complete(telegram.SendFile(group_link, gif))    
             elif do_action == 3: # Send random sentense
                 sentense = utility.CreateSentense()
+                if not CheckVPN():
+                    logging.info('Fail to connect VPN. Exit...')
+                    sys.exit()
                 send_message = loop.run_until_complete(telegram.SendMessage(group_link, sentense))
                 if send_message is not None:
                     logging.info('Sending message to group')   
             elif do_action == 4: # Mention a user
+                if not CheckVPN():
+                    logging.info('Fail to connect VPN. Exit...')
+                    sys.exit()
                 messages = loop.run_until_complete(telegram.GetMessage(group_link))
                 if messages is not None:
                     random_message = random.choice(messages)
                     user_name = random_message.sender.username
                     if user_name is not None:
                         msg = r'@' + user_name
+                        if not CheckVPN():
+                            logging.info('Fail to connect VPN. Exit...')
+                            sys.exit()
                         mention_user = loop.run_until_complete(telegram.SendMessage(group_link, msg))
                         if mention_user is not None:
                                 logging.info('Mentioned %s', user_name)
@@ -160,9 +200,15 @@ def main():
                                     'niazcom_ir', 'parsinehnews','tgacademy', 'Tebe_slami_irani', 'Dr_SalamatX', 'TVnavad', 'Ravan6enasii',
                                     'khandehabadd', 'serfan_jahate_ettela', 'NiazCom', 'bahseazad']
                 channel = random.choice(famous_channels)
+                if not CheckVPN():
+                    logging.info('Fail to connect VPN. Exit...')
+                    sys.exit()
                 messages = loop.run_until_complete(telegram.GetMessage(channel))
                 if messages is not None:
                     msg = random.choice(messages)
+                    if not CheckVPN():
+                        logging.info('Fail to connect VPN. Exit...')
+                        sys.exit()
                     send_forward_message = loop.run_until_complete(telegram.ForwardMessage(group_link, msg))
                     if send_forward_message is not None:
                         logging.info('Forward a message from %s to Phoenix group', channel)
