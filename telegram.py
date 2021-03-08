@@ -116,7 +116,7 @@ class Telegram:
         
         try:
             logging.info('Try to connect telegram...')
-            await self.tg_client.connect()
+            await asyncio.wait_for(self.tg_client.connect(), timeout = 120)
             if self.tg_client.is_connected() :
                 return True
         except errors.TimeoutError:
