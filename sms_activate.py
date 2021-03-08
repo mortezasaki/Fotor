@@ -130,13 +130,18 @@ class SMSActivate:
     def GetActivationCode(self, id, *, retry : int = 10, wait : float = 5):
         url = 'https://sms-activate.ru/stubs/handler_api.php?api_key={0}&action=getStatus&id={1}'.format(self.api_key, id)
         for i in range(retry):
-            req = requests.get(url)        
+            try:
+                req = requests.get(url)        
 
-            if req.status_code == 200:
-                pattern = r'^(STATUS_OK:)\d{5}$' # ex STATUS_OK:20980
-                if re.match(pattern, req.text):
-                    return req.text.split(':')[1]
-            sleep(wait)
+                if req.status_code == 200:
+                    pattern = r'^(STATUS_OK:)\d{5}$' # ex STATUS_OK:20980
+                    if re.match(pattern, req.text):
+                        return req.text.split(':')[1]
+                sleep(wait)
+            except KeyboardInterrupt:
+                continue
+            except Exception as e:
+                continue
         return None
     
     def GetCountryName(self, _id : int):
