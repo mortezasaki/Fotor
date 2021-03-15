@@ -50,8 +50,8 @@ class FotorShell(cmd.Cmd):
     @staticmethod
     def do_list(arg):
         'List of all running accounts'
-        print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloodwWait":<20}')
-        print('=' * 100)
+        print(f'{"PhoneNumber":<20}', f'{"UserName":<30}', f'{"Status":<20}', f'{"Joins":<20}', f'{"FloodWait":<20}')
+        print('=' * 110)
 
 
         showed = [] # a list that uses for which account type was showed

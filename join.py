@@ -107,22 +107,19 @@ def main():
         group_link = r'https://t.me/joinchat/IPiIQKTNSnm7_lPk'
 
         action = [
-            -2, # Join Channel
-            -1, # Join Channel
             0, # Join channel
             1, # Send emoji
             2, # Send gif
             3, # Send a random sentense
             4, # Mention user
             5, # Forward channel post message
-            # 5, # Send picture
         ]
         while True:
             db = Database()
             db.UpdateStatus(phone_number, TelegramRegisterStats.Running.value)
             emoji = utility.GetRandomEmoji()
-            do_action = random.choice(action)
-            if do_action in (-2, -1, 0): # Join   
+            do_action = random.choice(action, weights=(50, 10, 10, 10, 10, 10), k=6)
+            if do_action == 0: # Join   
                 try_to_connect_membersgram = 10
                 while try_to_connect_membersgram > 0: # fix Issue 15
                     channel = _api.CallGetChannel()
@@ -132,14 +129,20 @@ def main():
                         logging.info('Joining to %s channel', channel_username)
                         channel_id = channel['_id']
                         try:
-                                if not CheckVPN():
-                                    logging.info('Fail to connect VPN. Exit...')
-                                    sys.exit()
+                            if not CheckVPN():
+                                logging.info('Fail to connect VPN. Exit...')
+                                sys.exit()
                             joined = loop.run_until_complete(telegram.JoinChannel(channel_username))
                             if joined is not None:
                                 db.Join(phone_number, channel_username)
                                 if _api.CallJoin(channel_id):
-                                    logging.info('Join was done')
+                                    logging.info('Joining the channel has been successful.')
+                                    logging.info('The view increase...')
+                                    view = loop.run_until_complete(telegram.IncreasingView(channel_username))                        
+                                    if view:
+                                        logging.info('The view increase was successful')
+                                    else:
+                                        logging.info('Problem with increasing views')
                                     break
 
                         except ConnectionError:
@@ -159,17 +162,17 @@ def main():
 
             elif do_action == 1: # Send Emoji
                 logging.info('Sending emoji to Phoenix group...')
-                    if not CheckVPN():
-                        logging.info('Fail to connect VPN. Exit...')
-                        sys.exit()
+                if not CheckVPN():
+                    logging.info('Fail to connect VPN. Exit...')
+                    sys.exit()
                 loop.run_until_complete(telegram.SendMessage(group_link, emoji))
             elif do_action == 2: # Send Gif
                 logging.info('Sending gif to Phoenix group...')
                 gif = utility.DownloadGif()
                 if gif is not None:
-                        if not CheckVPN():
-                            logging.info('Fail to connect VPN. Exit...')
-                            sys.exit()
+                    if not CheckVPN():
+                        logging.info('Fail to connect VPN. Exit...')
+                        sys.exit()
                     loop.run_until_complete(telegram.SendFile(group_link, gif))    
             elif do_action == 3: # Send random sentense
                 sentense = utility.CreateSentense()
@@ -212,6 +215,13 @@ def main():
                     send_forward_message = loop.run_until_complete(telegram.ForwardMessage(group_link, msg))
                     if send_forward_message is not None:
                         logging.info('Forward a message from %s to Phoenix group', channel)
+            elif do_action == 6:
+                logging.info('Increasing view...')
+                res = loop.run_until_complete(telegram.IncreasingView())                        
+                if res:
+                    logging.info('Successful increasing view')
+                else:
+                    logging.info('Fail increasing view')
             db.Close()
             sleep(random.randint(5,15))     
 

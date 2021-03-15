@@ -4,7 +4,7 @@ import sys
 from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.functions.account import UpdateProfileRequest
-from telethon import errors, functions
+from telethon import errors, functions, types
 import asyncio
 import utility
 import logging
@@ -54,14 +54,20 @@ class Telegram:
 
     async def SendCode(self):
         try:
-            await self.tg_client.send_code_request(self.phone_number)
+            await asyncio.wait_for(self.tg_client.send_code_request(self.phone_number), timeout = 120)
             return True
-        except:
+        except errors.PhoneNumberBannedError:
+            logging.info('Phone is banned')
+            db = Database()
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenSignUp.value)
+            db.close()
+        except Exception as e:
+            logging.info(type(e).__name__, 'SendCode')
             return False
 
     async def SignUp(self, activation_code, name, family):
         try:
-            await self.tg_client.sign_up(activation_code, name, family)
+            await asyncio.wait_for(self.tg_client.sign_up(activation_code, name, family), timeout = 120)
             return True
         except errors.SessionPasswordNeededError:
             logging.info('Two-steps verification is enabled and a password is required.')
@@ -696,13 +702,44 @@ class Telegram:
         except sqlite3.OperationalError:
             logging.info('sqlite OperationalError on Resolve')
             return None
-        except errors.SessionPasswordNeededError: # Fix issue 23
-            logging.info('Two-steps verification is enabled and a password is required')
-            db.UpdateStatus(self.phone_number, TelegramRegisterStats.HasPassword.value)           
-            sys.exit()
         except TypeError:
             logging.info('Type error in %s', 'ForwardMessage')
         except Exception as e:
             logging.info(type(e).__name__, 'ForwardMessage')
             db.UpdateStatus(self.phone_number, TelegramRegisterStats.Stop.value)                                    
         return None
+
+    async def IncreasingView(self, channel, post_count = 20):
+        db = Database()
+        try:
+            channel = await self.tg_client.get_entity(channel)
+            messages = await self.tg_client.get_messages(channel, limit = post_count)
+            msg_ids = [msg.id for msg in messages]
+            # https://docs.telethon.dev/en/latest/examples/chats-and-channels.html
+            await self.tg_client(functions.messages.GetMessagesViewsRequest(
+                        peer=channel,
+                        id=msg_ids,
+                        increment=True
+                        ))
+            return True
+        except errors.ChannelPrivateError:
+            logging.info('The channel specified is private and you lack permission to access it. Another reason may be that you were banned from it.')
+        except errors.ChatIdInvalidError:
+            logging.info('Invalid object ID for a chat. Make sure to pass the right types, for instance making sure that the request is designed for chats (not channels/megagroups) or otherwise look for a different one more suited\nAn example working with a megagroup and AddChatUserRequest, it will fail because megagroups are channels. Use InviteToChannelRequest instead.')
+        except errors.PeerIdInvalidError:
+            logging.info('An invalid Peer was used. Make sure to pass the right peer type and that the value is valid (for instance, bots cannot start conversations).')
+        except errors.UserDeactivatedBanError:
+            logging.info('User has been banned')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.Ban.value)
+            db.NewIssue(self.phone_number, PhoneIssue.BanWhenJoining.value)
+            sys.exit() 
+        except errors.FloodWaitError as e:
+            logging.info('Flood wait for %s', e.seconds)
+            logging.info('Exit...')
+            db.UpdateStatus(self.phone_number, TelegramRegisterStats.FloodWait.value)
+            db.UpdateFlooWait(self.phone_number, e.seconds)
+            await self.tg_client.disconnect()
+            sys.exit()                       
+        except Exception as e:
+            logging.info(type(e).__name__, 'IncreasingView')
+        return False
